@@ -9,11 +9,25 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="pt-20">
-      {/* Hero */}
-      <section className="relative py-24 bg-gradient-to-b from-black to-zinc-950">
-        <div className="container mx-auto px-4 lg:px-8">
+     {/* Hero - Full Width with About Background */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/75 to-black/85 z-10" />
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage: `url('/about-hero.jpg')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-20 container mx-auto px-4 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-block mb-6 px-4 py-2 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-red-600/20 border border-blue-500/30 rounded-full">
+            <div className="inline-block mb-6 px-4 py-2 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-red-600/20 border border-blue-500/30 rounded-full backdrop-blur-sm">
               <span className="text-sm font-semibold text-gradient">About M Coding</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
@@ -21,10 +35,17 @@ export default function AboutPage() {
               <br />
               <span className="text-gradient">BMW & MINI Specialist</span>
             </h1>
-            <p className="text-xl text-gray-300">
+            <p className="text-xl text-gray-300 mb-12">
               Setting a new standard for BMW and MINI care in Ireland through expertise,
               innovation, and unwavering commitment to quality.
             </p>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2">
+            <div className="w-1 h-2 bg-white rounded-full" />
           </div>
         </div>
       </section>
