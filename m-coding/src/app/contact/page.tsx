@@ -1,0 +1,350 @@
+"use client";
+
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { useState } from "react";
+
+export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    vehicle: "",
+    registration: "",
+    service: "",
+    message: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Form submission logic would go here
+    alert("Thank you for your enquiry! We'll be in touch shortly.");
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  return (
+    <div className="pt-20">
+      {/* Hero */}
+      <section className="relative py-24 bg-gradient-to-b from-black to-zinc-950">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-block mb-6 px-4 py-2 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-red-600/20 border border-blue-500/30 rounded-full">
+              <span className="text-sm font-semibold text-gradient">Get In Touch</span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              Book Your <span className="text-gradient">Service</span>
+            </h1>
+            <p className="text-xl text-gray-300">
+              Ready to experience the M Coding difference? Contact us to discuss your
+              BMW or MINI's requirements and schedule your appointment.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Form & Info */}
+      <section className="py-24 bg-zinc-950">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            {/* Contact Information */}
+            <div className="lg:col-span-1 space-y-8">
+              <div>
+                <h2 className="text-3xl font-bold text-white mb-6">
+                  Contact <span className="text-gradient">Information</span>
+                </h2>
+                <p className="text-gray-400 mb-8">
+                  Get in touch with Ireland's first complete BMW & MINI specialist
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-blue-500/10 rounded-lg">
+                    <MapPin className="text-blue-500" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Location</h3>
+                    <p className="text-gray-400">Ardfinnan, Co.Tipperary E91YX50</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-purple-500/10 rounded-lg">
+                    <Phone className="text-purple-500" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Phone</h3>
+                    <p className="text-gray-400">Whatsapp 0876096830</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-red-500/10 rounded-lg">
+                    <Mail className="text-red-500" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Email</h3>
+                    <p className="text-gray-400">mcodingireland@gmail.com</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-green-500/10 rounded-lg">
+                    <Clock className="text-green-500" size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-white font-semibold mb-3">Opening Hours</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400">Monday - Friday</span>
+                        <span className="text-white font-semibold">10:00 - 18:00</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400">Saturday</span>
+                        <span className="text-blue-400 font-semibold">By Appointment</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400">Sunday</span>
+                        <span className="text-red-400 font-semibold">Closed</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-6">
+                <h3 className="text-white font-semibold mb-3">Why Choose M Coding?</h3>
+                <ul className="space-y-2 text-sm text-gray-400">
+                  <li>• BMW-Registered Specialist</li>
+                  <li>• Complete BMW & MINI Solution</li>
+                  <li>• Premium Quality Service</li>
+                  <li>• Advanced Coding & Remapping</li>
+                  <li>• OEM Retrofitting Experts</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Contact Form */}
+            <div className="lg:col-span-2">
+              <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-8">
+                <h2 className="text-2xl font-bold text-white mb-6">Send Us a Message</h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        required
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                        placeholder="John Smith"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                        placeholder="john@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                        placeholder="+353 XX XXX XXXX"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="vehicle" className="block text-sm font-medium text-gray-300 mb-2">
+                        Vehicle Model and Year
+                      </label>
+                      <input
+                        type="text"
+                        id="vehicle"
+                        name="vehicle"
+                        value={formData.vehicle}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                        placeholder="e.g., 2017 M4, 2019 520D"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="registration" className="block text-sm font-medium text-gray-300 mb-2">
+                        Vehicle Registration Number
+                      </label>
+                      <input
+                        type="text"
+                        id="registration"
+                        name="registration"
+                        value={formData.registration}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors uppercase"
+                        placeholder="e.g., 181-D-12345"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="service" className="block text-sm font-medium text-gray-300 mb-2">
+                        Service Required *
+                      </label>
+                      <select
+                        id="service"
+                        name="service"
+                        required
+                        value={formData.service}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                      >
+                        <option value="">Select a service</option>
+                        <option value="servicing">Vehicle Service</option>
+                        <option value="coding">Coding or Region Change</option>
+                        <option value="remapping">Performance Remapping</option>
+                        <option value="retrofitting">Retrofitting</option>
+                        <option value="diagnostics">Diagnostics</option>
+                        <option value="other">Other / General Enquiry</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
+                      Message *
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      required
+                      value={formData.message}
+                      onChange={handleChange}
+                      rows={6}
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                      placeholder="Tell us about your requirements..."
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white text-lg font-semibold rounded-lg hover:opacity-90 transition-all shadow-xl shadow-blue-500/30"
+                  >
+                    Send Message
+                  </button>
+
+                  <p className="text-sm text-gray-400 text-center">
+                    We'll respond to your enquiry within 24 hours
+                  </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Location Map */}
+      <section className="py-24 bg-black">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Find <span className="text-gradient">Our Location</span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Located in Ardfinnan, Co. Tipperary - Easily accessible with ample parking
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Map */}
+            <div className="lg:col-span-2">
+              <div className="bg-zinc-900/50 border border-white/10 rounded-xl overflow-hidden h-[500px]">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2408.7!2d-7.9!3d52.35!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTLCsDIxJzAwLjAiTiA3wrA1NCcwMC4wIlc!5e0!3m2!1sen!2sie!4v1234567890123!5m2!1sen!2sie&q=Ardfinnan,+Co.+Tipperary+E91YX50"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="M Coding Location Map"
+                />
+              </div>
+            </div>
+
+            {/* Location Info Card */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Location Details</h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-400 mb-1">Address</h4>
+                    <p className="text-white">Ardfinnan</p>
+                    <p className="text-white">Co. Tipperary</p>
+                    <p className="text-white">E91 YX50</p>
+                    <p className="text-white">Ireland</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/10">
+                    <h4 className="text-sm font-semibold text-gray-400 mb-2">Parking</h4>
+                    <p className="text-white text-sm">Free on-site parking available</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/10">
+                    <h4 className="text-sm font-semibold text-gray-400 mb-2">Directions</h4>
+                    <p className="text-white text-sm mb-3">Easily accessible from Clonmel and Cahir</p>
+                    <a
+                      href="https://www.google.com/maps/dir/?api=1&destination=Ardfinnan,+Co.+Tipperary+E91YX50"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-all"
+                    >
+                      Get Directions
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-red-600/10 border border-blue-500/20 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-2">By Appointment Only</h3>
+                <p className="text-sm text-gray-300">
+                  To ensure we provide the best service, we operate by appointment.
+                  Please contact us to schedule your visit.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Red left M leg -->
+  <path fill="#D32027" d="M 30 20 L 30 180 L 55 180 L 90 95 L 30 20 Z"/>
+
+  <!-- Red center diamond -->
+  <path fill="#D32027" d="M 55 180 L 75 135 L 110 135 L 90 95 Z"/>
+
+  <!-- Silver right M leg -->
+  <path fill="#B8B8B8" d="M 170 20 L 110 95 L 125 180 L 170 180 Z"/>
+
+  <!-- Silver center connection -->
+  <path fill="#B8B8B8" d="M 110 95 L 90 135 L 125 135 L 125 180 Z"/>
+</svg>
