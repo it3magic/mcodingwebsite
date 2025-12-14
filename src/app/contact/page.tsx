@@ -16,8 +16,36 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Form submission logic would go here
-    alert("Thank you for your enquiry! We'll be in touch shortly.");
+    
+    // Build WhatsApp message with form data
+    let message = `*New Service Enquiry from Website*\n\n`;
+    message += `*Name:* ${formData.name}\n`;
+    message += `*Email:* ${formData.email}\n`;
+    
+    if (formData.phone) {
+      message += `*Phone:* ${formData.phone}\n`;
+    }
+    
+    if (formData.vehicle) {
+      message += `*Vehicle:* ${formData.vehicle}\n`;
+    }
+    
+    if (formData.registration) {
+      message += `*Registration:* ${formData.registration}\n`;
+    }
+    
+    if (formData.service) {
+      message += `*Service Required:* ${formData.service}\n`;
+    }
+    
+    message += `\n*Message:*\n${formData.message}`;
+    
+    // WhatsApp URL with Ireland country code (+353)
+    const phoneNumber = "353876096830";
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    
+    // Open WhatsApp in new tab
+    window.open(whatsappUrl, '_blank');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
