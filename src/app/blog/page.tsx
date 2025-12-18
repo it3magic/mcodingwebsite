@@ -16,13 +16,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogPage({
+export default async function BlogPage({
   searchParams
 }: {
-  searchParams: { category?: string }
+  searchParams: Promise<{ category?: string }>
 }) {
   const categories = getAllCategories();
-  const selectedCategory = searchParams?.category;
+  const params = await searchParams;
+  const selectedCategory = params?.category;
 
   // Filter posts by category if one is selected
   const filteredPosts = selectedCategory
