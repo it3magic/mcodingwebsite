@@ -7,6 +7,7 @@ import { Calendar, Clock, Tag, ArrowLeft, ArrowRight, User } from "lucide-react"
 import { notFound } from "next/navigation";
 import ReactMarkdown from 'react-markdown';
 import BlogNewsletter from "@/components/blog-newsletter";
+import BlogSocialShare from "@/components/blog-social-share";
 
 // Helper function to generate IDs from heading text for anchor links
 const generateId = (text: string): string => {
@@ -212,6 +213,13 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
                 ))}
               </div>
             </div>
+
+            {/* Social Share */}
+            <BlogSocialShare
+              title={post.title}
+              slug={post.slug}
+              excerpt={post.excerpt}
+            />
           </div>
         </div>
       </section>
