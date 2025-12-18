@@ -16,8 +16,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogPage() {
+export default function BlogPage({
+  searchParams
+}: {
+  searchParams: { category?: string }
+}) {
   const categories = getAllCategories();
+  const selectedCategory = searchParams?.category;
+
+  // Filter posts by category if one is selected
+  const filteredPosts = selectedCategory
+    ? blogPosts.filter(post => post.category.toLowerCase() === selectedCategory.toLowerCase())
+    : blogPosts;
 
   return (
     <div className="pt-20">
@@ -46,7 +56,11 @@ export default function BlogPage() {
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
               href="/blog"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:opacity-90 transition-all"
+              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                !selectedCategory
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                  : 'bg-white/10 border border-white/20 text-white hover:bg-white/20'
+              }`}
             >
               All Posts
             </Link>
@@ -54,7 +68,11 @@ export default function BlogPage() {
               <Link
                 key={category}
                 href={`/blog?category=${category.toLowerCase()}`}
-                className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg font-semibold hover:bg-white/20 transition-all"
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  selectedCategory?.toLowerCase() === category.toLowerCase()
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                    : 'bg-white/10 border border-white/20 text-white hover:bg-white/20'
+                }`}
               >
                 {category}
               </Link>
@@ -67,7 +85,7 @@ export default function BlogPage() {
       <section className="py-24 bg-black">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-            {blogPosts.map((post) => (
+            {filteredPosts.map((post) => (
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
@@ -133,9 +151,9 @@ export default function BlogPage() {
           </div>
 
           {/* No Posts Message (if filtering results in empty) */}
-          {blogPosts.length === 0 && (
+          {filteredPosts.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-gray-400 text-xl">No blog posts found.</p>
+              <p className="text-gray-400 text-xl">No blog posts found in this category.</p>
             </div>
           )}
         </div>
