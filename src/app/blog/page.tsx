@@ -2,6 +2,7 @@ import Link from "next/link";
 import { blogPosts, getAllCategories } from "./blog-data";
 import { Calendar, Clock, Tag, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
+import BlogNewsletter from "@/components/blog-newsletter";
 
 export const metadata: Metadata = {
   title: "Blog | BMW & MINI Servicing Tips & Guides",
@@ -137,6 +138,13 @@ export default function BlogPage() {
               <p className="text-gray-400 text-xl">No blog posts found.</p>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-16 bg-zinc-950">
+        <div className="container mx-auto px-4 lg:px-8 max-w-4xl">
+          <BlogNewsletter />
         </div>
       </section>
 

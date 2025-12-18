@@ -6,6 +6,7 @@ import { getBlogPostBySlug, blogPosts } from "../blog-data";
 import { Calendar, Clock, Tag, ArrowLeft, ArrowRight, User } from "lucide-react";
 import { notFound } from "next/navigation";
 import ReactMarkdown from 'react-markdown';
+import BlogNewsletter from "@/components/blog-newsletter";
 
 // Helper function to generate IDs from heading text for anchor links
 const generateId = (text: string): string => {
@@ -212,6 +213,13 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-16 bg-zinc-950">
+        <div className="container mx-auto px-4 lg:px-8 max-w-4xl">
+          <BlogNewsletter />
         </div>
       </section>
 

@@ -247,6 +247,12 @@ export default function RootLayout({
           </main>
           <Footer />
         </ClientBody>
+        {/* Hidden Netlify form for blog newsletter */}
+        <form name="blog-newsletter" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+          <input type="hidden" name="form-name" value="blog-newsletter" />
+          <input type="hidden" name="bot-field" />
+          <input type="email" name="email" />
+        </form>
       </body>
     </html>
   );
