@@ -17,14 +17,14 @@ export default function BlogNewsletter() {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("form-name", "blog-newsletter");
-      formData.append("email", email);
+      const params = new URLSearchParams();
+      params.append("form-name", "blog-newsletter");
+      params.append("email", email);
 
       const response = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formData as unknown as Record<string, string>).toString(),
+        body: params.toString(),
       });
 
       if (response.ok) {
@@ -49,13 +49,17 @@ export default function BlogNewsletter() {
         {submitted ? (
           <div className="bg-green-900/20 border border-green-800 rounded-lg p-4">
             <p className="text-green-400 font-medium">
-              ✓ Thank you for subscribing! You'll receive our latest BMW tips and guides.
+              ✓ Thank you for subscribing! You've been added to our mailing list and will receive updates about our latest BMW tips and guides.
+            </p>
+            <p className="text-green-300 text-sm mt-2">
+              Note: You won't receive an automatic confirmation email, but your subscription has been recorded successfully.
             </p>
           </div>
         ) : (
           <form
             name="blog-newsletter"
             method="POST"
+            action="/"
             data-netlify="true"
             data-netlify-honeypot="bot-field"
             onSubmit={handleSubmit}
