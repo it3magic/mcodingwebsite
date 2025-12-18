@@ -228,7 +228,6 @@ Professional intake manifold cleaning represents a fraction of the cost of poten
 
 - **Intake Manifold Cleaning Service**: €350-€550
 - **Walnut Blasting Service**: €250-€400 (if required)
-- **Swirl Flap Replacement**: €400-€800 (parts and labor)
 
 **Contact M Coding Ireland today to:**
 - Schedule your intake manifold inspection and cleaning
