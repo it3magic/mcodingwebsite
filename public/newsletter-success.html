@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newsletter Subscription Successful | M Coding Ireland</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 48px 32px;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #3b82f6, #a855f7, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    p {
+      font-size: 18px;
+      color: #d1d5db;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+    .note {
+      font-size: 14px;
+      color: #9ca3af;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 32px;
+    }
+    .button {
+      display: inline-block;
+      background: linear-gradient(135deg, #3b82f6, #a855f7);
+      color: white;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: opacity 0.2s;
+    }
+    .button:hover {
+      opacity: 0.9;
+    }
+    .checkmark {
+      font-size: 64px;
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="checkmark">✓</div>
+    <h1>Successfully Subscribed!</h1>
+    <p>Thank you for subscribing to the M Coding Ireland blog! You've been added to our mailing list and will receive updates about our latest BMW tips, coding guides, and performance insights.</p>
+    <div class="note">
+      <strong>Note:</strong> You won't receive an automatic confirmation email, but your subscription has been recorded successfully in our system.
+    </div>
+    <a href="/blog" class="button">← Back to Blog</a>
+  </div>
+  <script>
+    // Auto-redirect after 5 seconds
+    setTimeout(() => {
+      window.location.href = '/blog';
+    }, 5000);
+  </script>
+</body>
+</html>

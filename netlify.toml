@@ -8,3 +8,7 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Netlify Forms configuration
+[[forms]]
+  name = "blog-newsletter"
