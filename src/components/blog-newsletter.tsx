@@ -49,7 +49,7 @@ export default function BlogNewsletter() {
         {submitted ? (
           <div className="bg-green-900/20 border border-green-800 rounded-lg p-4">
             <p className="text-green-400 font-medium">
-              Thank you for subscribing! Check your inbox for confirmation.
+              ✓ Thank you for subscribing! You'll receive our latest BMW tips and guides.
             </p>
           </div>
         ) : (
