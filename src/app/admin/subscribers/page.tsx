@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { FileSpreadsheet, Mail, Zap, Download, ExternalLink, Bell } from "lucide-react";
+import { redirect } from "next/navigation";
+import { FileSpreadsheet, Mail, Zap, Download, ExternalLink, Bell, LogOut } from "lucide-react";
+import { isAuthenticated } from "@/lib/auth";
+import LogoutButton from "@/components/admin/logout-button";
 
 export const metadata = {
   title: "Newsletter Subscribers | Admin",
@@ -10,7 +13,14 @@ export const metadata = {
   },
 };
 
-export default function SubscribersAdminPage() {
+export default async function SubscribersAdminPage() {
+  // Check if user is authenticated
+  const authenticated = await isAuthenticated();
+
+  if (!authenticated) {
+    redirect('/admin/login');
+  }
+
   return (
     <div className="min-h-screen bg-black pt-20">
       {/* Header */}
@@ -25,12 +35,15 @@ export default function SubscribersAdminPage() {
                 Manage and track your blog newsletter subscriptions
               </p>
             </div>
-            <Link
-              href="/"
-              className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all"
-            >
-              ← Back to Home
-            </Link>
+            <div className="flex items-center gap-3">
+              <LogoutButton />
+              <Link
+                href="/"
+                className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all"
+              >
+                ← Back to Home
+              </Link>
+            </div>
           </div>
         </div>
       </div>
