@@ -12,7 +12,24 @@ export const metadata: Metadata = {
     title: "BMW & MINI Blog | M Coding Ireland",
     description: "Expert advice on BMW servicing, coding, performance remapping, and importing vehicles to Ireland.",
     url: "https://m-coding.ie/blog",
+    siteName: "M Coding Ireland",
+    images: [
+      {
+        url: "https://m-coding.ie/m-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "M Coding Ireland - BMW & MINI Specialists",
+      },
+    ],
+    locale: "en_IE",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BMW & MINI Blog | M Coding Ireland",
+    description: "Expert advice on BMW servicing, coding, performance remapping, and importing vehicles to Ireland.",
+    images: ["https://m-coding.ie/m-logo.png"],
+    creator: "@mcodingireland",
   },
 };
 

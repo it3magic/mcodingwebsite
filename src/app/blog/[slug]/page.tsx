@@ -1,6 +1,4 @@
-"use client";
-
-import { use } from "react";
+import { Metadata } from "next";
 import Link from "next/link";
 import { getBlogPostBySlug, blogPosts } from "../blog-data";
 import { Calendar, Clock, Tag, ArrowLeft, ArrowRight, User } from "lucide-react";
@@ -17,8 +15,68 @@ const generateId = (text: string): string => {
     .replace(/^-+|-+$/g, '');
 };
 
-export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+// Generate metadata for social sharing
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getBlogPostBySlug(slug);
+
+  if (!post) {
+    return {
+      title: 'Post Not Found',
+    };
+  }
+
+  const url = `https://m-coding.ie/blog/${post.slug}`;
+  const imageUrl = `https://m-coding.ie${post.featuredImage}`;
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    keywords: post.tags.join(', '),
+    authors: [{ name: post.author }],
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: url,
+      siteName: 'M Coding Ireland',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+      locale: 'en_IE',
+      type: 'article',
+      publishedTime: post.publishDate,
+      modifiedTime: post.lastModified,
+      authors: [post.author],
+      tags: post.tags,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: [imageUrl],
+      creator: '@mcodingireland',
+    },
+    alternates: {
+      canonical: url,
+    },
+  };
+}
+
+export default async function BlogPostPage({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params;
   const post = getBlogPostBySlug(slug);
 
   if (!post) {
