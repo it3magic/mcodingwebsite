@@ -938,6 +938,243 @@ We're Ireland's trusted BMW remapping specialist - let us show you what your car
     featuredImage: "/performance-hero.jpg",
     tags: ["BMW Remap", "ECU Tuning", "Performance", "Stage 1"],
     readTime: "7 min read"
+  },
+  {
+    id: 6,
+    slug: "s55-engine-camshaft-realignment-m2-m3-m4",
+    title: "S55 Engine Exhaust Camshaft Realignment - Fixing the Notorious Cold Start Ticking",
+    excerpt: "Does your BMW M2 Competition, M3, or M4 have a ticking noise on cold start? We explain the S55 camshaft carrier misalignment issue and our professional realignment solution.",
+    content: `
+# S55 Engine Exhaust Camshaft Realignment - Fixing the Notorious Cold Start Ticking
+
+If you own a BMW M2 Competition, M3 (F80), or M4 (F82/F83) and have noticed an annoying ticking or tapping noise from the engine bay during cold starts, you're not alone. This is a well-documented issue with the S55 engine that affects many owners.
+
+The good news? It's completely fixable with our professional exhaust camshaft carrier realignment service.
+
+![BMW M4 with S55 Engine](/S55Cam/IMG_3365.JPEG)
+*BMW M4 F82 - One of the models affected by the S55 camshaft carrier issue*
+
+## The Problem: Cold Start Ticking Noise
+
+### What Does It Sound Like?
+
+Owners typically describe the noise as:
+- A distinct **ticking or tapping** sound from the top end of the engine
+- Most noticeable **immediately after cold start**
+- Becomes more apparent as engine RPM returns to normal idle speed (around 800-1000 RPM)
+- Predominantly heard from the **driver's side of the engine bay**
+- The noise usually disappears when the engine warms up, but in some instances if left unresolved for too long, it can be heard at all times
+
+### Which Models Are Affected?
+
+This issue affects S55-powered BMW models, including:
+- **BMW M2 Competition** (F87)
+- **BMW M3** (F80) - 2014-2018
+- **BMW M4** (F82 Coupe / F83 Convertible) - 2014-2018
+
+## The Root Cause: Exhaust Camshaft Carrier Misalignment
+
+The ticking noise is caused by **misalignment of the exhaust camshaft carrier**. Over time and through thermal cycling (heating and cooling of the engine), the camshaft carrier can shift slightly out of its optimal position.
+
+This misalignment affects the valve train geometry, causing:
+- Inconsistent valve lash (clearance)
+- Increased mechanical noise during cold operation
+- Potential for accelerated wear if left unaddressed
+
+**The noise itself doesn't indicate catastrophic engine failure**, but it's an annoyance and can lead to increased wear over time. Many owners find it concerning and want it resolved.
+
+## The Realignment Procedure
+
+Our comprehensive service includes:
+
+**1. Complete Disassembly**
+- Removal of rocker cover and associated components
+- Access to camshaft carrier assembly
+- Inspection of all related components
+
+**2. Precision Realignment**
+- Loosening and precise repositioning of exhaust camshaft carrier
+- Use of BMW-specific tooling for accurate alignment
+- High-precision torque equipment to ensure correct bolt tension
+
+![Post-Realignment Engine Bay](/S55Cam/IMG_3394.JPEG)
+*Engine bay after successful camshaft carrier realignment - ready for reassembly*
+
+**3. Component Replacement**
+We replace all critical sealing and fastening components with genuine BMW parts:
+
+- **Genuine New BMW Stretch Bolts**
+  - These are single-use torque-to-yield bolts
+  - Cannot be safely reused after removal
+  - Critical for proper clamping force and engine integrity
+
+![Old vs New Stretch Bolts](/S55Cam/IMG_3403.JPEG)
+*Old vs new stretch bolts*
+
+- **New Injector Seals**
+  - Prevent fuel leaks and maintain proper injector seating
+  - Essential for optimal fuel delivery
+
+![New Injector Seals](/S55Cam/IMG_3463.JPEG)
+*Fresh genuine BMW injector seals ready for installation*
+
+- **Rocker Cover Gasket**
+  - Ensures oil-tight seal when reassembling
+  - Prevents future oil leaks
+
+**4. Quality Assurance**
+- Verification of alignment using BMW diagnostic procedures
+- Torque verification on all fasteners
+
+## Post-Service Recommendations
+
+### Oil and Filter Change (Recommended)
+
+We **strongly recommend** performing an oil and filter change after the camshaft realignment procedure. Here's why:
+
+- The procedure involves opening the valve train, which can introduce small particulates into the oil system
+- Fresh oil ensures optimal lubrication of newly aligned components
+- Provides peace of mind and extends engine life
+
+![Fresh Oil Change](/S55Cam/IMG_3483.JPEG)
+*Fresh oil and filter change - the perfect complement to camshaft realignment*
+
+### New Rocker Cover (Optional - Recommended for Higher Mileage)
+
+For higher mileage S55 engines (typically over 100,000 km), we recommend considering a **new rocker cover** as an optional upgrade:
+
+**Why Replace the Rocker Cover?**
+- Over time, the plastic rocker cover can develop micro-cracks
+- Oil vapor permeation can cause external oil weeping
+- Not only does it prevent future oil leaks, it replaces the PCV valve, a common failure point on the S55 engine
+- A new cover provides long-term reliability
+
+**When to Replace:**
+- If your rocker cover shows signs of oil seepage
+- If the cover has visible cracks or damage
+- On engines with over 100,000 kilometers
+- During preventive maintenance for peace of mind
+
+## Our Professional Approach
+
+### BMW-Specific Tools and Equipment
+
+We use the correct tools for the job:
+- **BMW Factory Special Tools** for camshaft carrier alignment
+- **Precision Torque Equipment** calibrated to BMW specifications
+- **Genuine BMW Parts** for all replacement components
+
+![BMW Camshaft Alignment Tools](/S55Cam/camAll.jpg)
+*BMW factory special tools for precise camshaft carrier alignment*
+
+This isn't a job that can be done properly with generic tools. The precision required for correct alignment demands BMW-specific tooling and extensive S55 experience.
+
+### Time Required
+
+This is a detailed, precision procedure that requires:
+- **Full day service** - we need your car from morning until end of day
+- This allows proper disassembly, realignment, reassembly, and quality checks
+- Rush jobs risk improper alignment and recurring issues
+
+**We don't cut corners.** Proper realignment takes time, and we ensure it's done right the first time.
+
+## The Results: Silence Restored
+
+After our camshaft carrier realignment procedure:
+- ✅ **The ticking noise is eliminated**
+- ✅ Camshaft carrier is precisely aligned to BMW specifications
+- ✅ Valve train operates as designed
+- ✅ All new genuine BMW seals and gaskets installed
+- ✅ Fresh engine oil for optimal protection
+
+**The noise will not return** when the procedure is performed correctly with proper tooling and genuine parts.
+
+## Pricing and Booking
+
+**S55 Camshaft Carrier Realignment Service**
+
+### Base Service: €649
+
+**Includes:**
+- Complete camshaft carrier realignment procedure
+- Genuine BMW stretch bolts
+- New injector seals
+- New rocker cover gasket
+- Use of BMW special tools and precision torque equipment
+- Full-day professional service
+
+**Optional Extras:**
+- **Oil and Filter Change**: €120 (Highly Recommended)
+- **New Rocker Cover**: €POA (Recommended for higher mileage)
+
+### What You Can Expect
+
+**Before Service:**
+- Cold start ticking/tapping noise from engine bay
+- Concern about potential engine issues
+- Reduced confidence in your M car
+
+**After Service:**
+- Silent cold starts
+- Properly aligned camshaft carrier to BMW specifications
+- Peace of mind knowing the issue is permanently resolved
+- Restored confidence in your BMW M vehicle
+
+## Why Choose M Coding Ireland?
+
+**Specialized S55 Experience**
+- We've performed this procedure on numerous M2 Competition, M3, and M4 models
+- Deep understanding of the S55 engine platform
+- Track record of successful realignments
+
+**Genuine BMW Parts**
+- All replacement components are genuine BMW
+- No aftermarket substitutes for critical components
+- Proper parts ensure proper results
+
+**Professional Equipment**
+- BMW factory special tools
+- Calibrated precision torque equipment
+- Diagnostic equipment to verify results
+
+**Transparent Service**
+- Clear explanation of the issue and solution
+- Upfront pricing with no hidden costs
+- Photo documentation of work performed
+
+## Common Questions
+
+**Q: Will the noise come back after realignment?**
+No. When performed correctly with proper alignment and genuine parts, the noise is permanently eliminated.
+
+**Q: How long does the procedure take?**
+We require your car for a full day. Proper alignment cannot be rushed.
+
+**Q: Can I drive the car with the ticking noise?**
+Yes, however we recommend to get this issue addressed as soon as possible. Leaving this issue unresolved for extended periods will cause accelerated wear to exhaust camshaft and cam carrier.
+
+**Q: Will this affect my engine warranty?**
+This is a corrective procedure using genuine BMW parts and factory procedures. However, we recommend checking your specific warranty terms if you have extended coverage.
+
+**Q: Should I do the oil change at the same time?**
+Absolutely. While technically optional, we strongly recommend it to ensure all contaminants are removed after opening the valve train.
+
+**Q: What if I have high mileage - should I replace the rocker cover?**
+If your S55 has over 100,000 km or shows any signs of oil seepage, replacing the rocker cover during this service is cost-effective preventive maintenance.
+
+## Book Your S55 Camshaft Realignment
+
+If your BMW M2 Competition, M3, or M4 is suffering from the cold start ticking noise, don't let it continue. Our camshaft carrier realignment service will restore the silent, smooth operation you expect from your M car.
+
+**[Contact Us to Book Your Service](/contact)**
+    `,
+    category: "Servicing",
+    author: "M Coding Ireland",
+    publishDate: "2025-12-21",
+    lastModified: "2025-12-21",
+    featuredImage: "/S55Cam/IMG_3404.JPEG",
+    tags: ["S55 Engine", "M2 Competition", "M3", "M4", "Camshaft Realignment", "BMW Servicing", "Engine Noise"],
+    readTime: "10 min read"
   }
 ];
 
