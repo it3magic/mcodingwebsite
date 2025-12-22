@@ -267,7 +267,7 @@ export const products: Product[] = [
       "Warranty": "6 Months",
     },
     compatibility: "Available For Xenon and Adaptive Xenon pre-facelift and facelift F10 and F11 headlights.",
-    installation: "In-House professional installation. Car or Headlights need to be dropped off and left for 1 day. By appointment only",
+    installation: "Choose between drop off/pick up service at no extra charge, or our remove and refit in-house service for €135 inc VAT. Headlights need to be left for 1 day. By appointment only",
     inStock: true,
     featured: false,
     hasOptions: true,
@@ -291,6 +291,10 @@ export const products: Product[] = [
       dropdown5: {
         label: "DRL Modules",
         choices: ["No New DRL Modules required", "1x New DRL required", "2x New DRL Modules required"],
+      },
+      dropdown6: {
+        label: "Installation Service",
+        choices: ["Drop off/Pick up service (No extra charge)", "Remove and refit in house (+€135 inc VAT)"],
       },
     },
   },
