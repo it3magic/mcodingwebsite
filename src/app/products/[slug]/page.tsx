@@ -115,8 +115,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   };
 
   const installationPricing: Record<string, number> = {
-    "Drop off & collect": 0,
-    "In-House removal and refitting service": 145,
+    "Drop off/Pick up service (No extra charge)": 0,
+    "Remove and refit in house (+€135 inc VAT)": 135,
   };
 
   // Get available fluid options for ZF/DCT transmission based on transmission type
