@@ -15,6 +15,18 @@ const generateId = (text: string): string => {
     .replace(/^-+|-+$/g, '');
 };
 
+// Generate static params for all blog posts
+export function generateStaticParams() {
+  return blogPosts
+    .filter((post) => post && post.slug)
+    .map((post) => ({
+      slug: post.slug,
+    }));
+}
+
+// Don't generate pages for slugs not returned by generateStaticParams
+export const dynamicParams = false;
+
 // Generate metadata for social sharing
 export async function generateMetadata({
   params

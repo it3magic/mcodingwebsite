@@ -239,7 +239,7 @@ At M Coding Ireland, we use dealer-level diagnostic tools and follow BMW's exact
     featuredImage: "/zf-transmission-service.jpg",
     tags: ["ZF Transmission", "BMW Service", "Maintenance", "8-Speed Gearbox"],
     readTime: "6 min read"
-  },,
+  },
 {
     id: 3,
     slug: "diesel-intake-manifold-cleaning-preventative-maintenance",
@@ -343,7 +343,7 @@ Protect your investment with professional diesel intake system maintenance from 
     featuredImage: "/intake1.jpg",
     tags: ["Intake Cleaning", "Diesel Service", "Preventative Maintenance", "Walnut Blasting", "Swirl Flaps"],
     readTime: "8 min read"
-  },,
+  },
 {
     id: 4,
     slug: "bmw-idrive-systems-guide",
