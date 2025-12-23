@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle, Star, Gauge, Wrench, Shield, Zap, Code } from "lucide-react";
 import WhatsAppWidget from "./components/WhatsAppWidget";
+import NotificationBanner from "@/components/notification-banner";
 
 export default function Home() {
   return (
     <div className="pt-20">
       <WhatsAppWidget />
+      <NotificationBanner />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image with Overlay */}

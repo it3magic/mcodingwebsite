@@ -90,20 +90,23 @@ export default async function SubscribersAdminPage() {
               </p>
             </div>
 
-            {/* Email Notifications */}
-            <div className="bg-gradient-to-br from-red-900/20 to-blue-900/20 border border-white/10 rounded-xl p-6">
+            {/* Homepage Notification */}
+            <Link
+              href="/admin/notification"
+              className="group bg-gradient-to-br from-red-900/20 to-blue-900/20 border border-white/10 rounded-xl p-6 hover:border-white/30 transition-all"
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-red-500/20 rounded-lg">
                   <Bell className="text-red-400" size={24} />
                 </div>
               </div>
               <h3 className="text-lg font-bold text-white mb-2">
-                Email Alerts
+                Homepage Banner
               </h3>
               <p className="text-sm text-gray-400">
-                Get notified for each new subscriber
+                Manage urgent announcements and closures
               </p>
-            </div>
+            </Link>
           </div>
 
           {/* How to Access Subscribers */}
