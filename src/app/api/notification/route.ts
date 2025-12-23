@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { readFile } from "fs/promises";
+import { join } from "path";
 import { isAuthenticated } from "@/lib/auth";
 
+const NOTIFICATION_FILE = join(process.cwd(), "public", "notification.json");
+
 export async function GET() {
-  const cookieStore = await cookies();
-  const notificationCookie = cookieStore.get("site-notification");
-
-  if (notificationCookie?.value) {
-    try {
-      return NextResponse.json(JSON.parse(notificationCookie.value));
-    } catch (error) {
-      // If parsing fails, return default
-    }
+  try {
+    const data = await readFile(NOTIFICATION_FILE, "utf-8");
+    return NextResponse.json(JSON.parse(data));
+  } catch (error) {
+    // Return default if file doesn't exist or can't be read
+    return NextResponse.json({
+      enabled: false,
+      message: "",
+      type: "info",
+      lastUpdated: "",
+    });
   }
-
-  // Return default if no cookie exists
-  return NextResponse.json({
-    enabled: false,
-    message: "",
-    type: "info",
-    lastUpdated: "",
-  });
 }
 
 export async function POST(request: Request) {
@@ -41,16 +38,13 @@ export async function POST(request: Request) {
       lastUpdated: new Date().toISOString(),
     };
 
-    const response = NextResponse.json({ success: true, data: notificationData });
-
-    // Store notification data in a cookie (max age: 1 year)
-    response.cookies.set("site-notification", JSON.stringify(notificationData), {
-      maxAge: 60 * 60 * 24 * 365, // 1 year
-      path: "/",
-      sameSite: "lax",
+    // Return the notification data with instructions for manual update
+    // Netlify's file system is read-only, so changes must be committed to GitHub
+    return NextResponse.json({
+      success: true,
+      data: notificationData,
+      instructions: "Update public/notification.json in your GitHub repository with this data, then redeploy on Netlify."
     });
-
-    return response;
   } catch (error) {
     console.error("Notification update error:", error);
     return NextResponse.json(
