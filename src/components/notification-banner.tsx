@@ -60,21 +60,21 @@ export default function NotificationBanner() {
   const Icon = icons[notification.type];
 
   return (
-    <div className="fixed top-20 left-0 right-0 z-50 px-4 py-3">
+    <div className="fixed top-16 sm:top-20 left-0 right-0 z-50 px-2 sm:px-4 py-2 sm:py-3">
       <div className={`${bgColors[notification.type]} border-2 rounded-lg shadow-2xl max-w-4xl mx-auto backdrop-blur-sm`}>
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-1">
-            <Icon className="w-6 h-6 text-white flex-shrink-0" />
-            <p className="text-white font-semibold text-lg leading-relaxed">
+        <div className="px-3 sm:px-6 py-3 sm:py-4 flex items-start sm:items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white flex-shrink-0 mt-0.5 sm:mt-0" />
+            <p className="text-white font-semibold text-sm sm:text-base md:text-lg leading-snug sm:leading-relaxed break-words">
               {notification.message}
             </p>
           </div>
           <button
             onClick={handleDismiss}
-            className="text-white/80 hover:text-white transition-colors flex-shrink-0 p-1 hover:bg-white/10 rounded"
+            className="text-white/80 hover:text-white transition-colors flex-shrink-0 p-1 hover:bg-white/10 rounded -mt-1 sm:mt-0"
             aria-label="Dismiss notification"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
