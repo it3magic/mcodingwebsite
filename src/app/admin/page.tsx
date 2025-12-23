@@ -5,15 +5,15 @@ import { isAuthenticated } from "@/lib/auth";
 import LogoutButton from "@/components/admin/logout-button";
 
 export const metadata = {
-  title: "Newsletter Subscribers | Admin",
-  description: "Manage your newsletter subscribers",
+  title: "Admin Dashboard | M Coding Ireland",
+  description: "Manage your website and subscribers",
   robots: {
     index: false,
     follow: false,
   },
 };
 
-export default async function SubscribersAdminPage() {
+export default async function AdminDashboardPage() {
   // Check if user is authenticated
   const authenticated = await isAuthenticated();
 
@@ -29,10 +29,10 @@ export default async function SubscribersAdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">
-                Newsletter <span className="text-gradient">Subscribers</span>
+                Admin <span className="text-gradient">Dashboard</span>
               </h1>
               <p className="text-gray-400">
-                Manage and track your blog newsletter subscriptions
+                Manage notifications, subscribers, and site content
               </p>
             </div>
             <div className="flex items-center gap-3">

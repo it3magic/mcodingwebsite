@@ -76,7 +76,7 @@ export default function NotificationAdminPage() {
               </p>
             </div>
             <Link
-              href="/admin/subscribers"
+              href="/admin"
               className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
             >
               <ArrowLeft size={16} />
