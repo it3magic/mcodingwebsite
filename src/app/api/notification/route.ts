@@ -5,7 +5,7 @@ import { isAuthenticated } from "@/lib/auth";
 export async function GET() {
   try {
     const store = getStore("site-data");
-    const notificationData = await store.get("notification");
+    const notificationData = await store.get("notification", { type: "text" });
 
     if (notificationData) {
       return NextResponse.json(JSON.parse(notificationData));
