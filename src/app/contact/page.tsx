@@ -4,6 +4,7 @@ import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackFormSubmission, trackWhatsAppClick } from "@/components/GoogleAnalytics";
+import NotificationBannerInline from "@/components/notification-banner-inline";
 
 function ContactForm() {
   const searchParams = useSearchParams();
@@ -143,6 +144,12 @@ function ContactForm() {
         {/* Top Glow Effect */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-32 bg-blue-500/5 blur-3xl" />
+
+        {/* Notification Banner - Positioned above form */}
+        <div className="relative z-10 mb-8">
+          <NotificationBannerInline />
+        </div>
+
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Contact Information */}
