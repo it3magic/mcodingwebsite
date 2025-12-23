@@ -1,16 +1,25 @@
 import { NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { getStore } from "@netlify/blobs";
 import { isAuthenticated } from "@/lib/auth";
-
-const NOTIFICATION_FILE = join(process.cwd(), "public", "notification.json");
 
 export async function GET() {
   try {
-    const data = await readFile(NOTIFICATION_FILE, "utf-8");
-    return NextResponse.json(JSON.parse(data));
+    const store = getStore("site-data");
+    const notificationData = await store.get("notification");
+
+    if (notificationData) {
+      return NextResponse.json(JSON.parse(notificationData));
+    }
+
+    // Return default if no data exists
+    return NextResponse.json({
+      enabled: false,
+      message: "",
+      type: "info",
+      lastUpdated: "",
+    });
   } catch (error) {
-    // Return default if file doesn't exist or can't be read
+    console.error("Failed to fetch notification:", error);
     return NextResponse.json({
       enabled: false,
       message: "",
@@ -38,12 +47,13 @@ export async function POST(request: Request) {
       lastUpdated: new Date().toISOString(),
     };
 
-    // Return the notification data with instructions for manual update
-    // Netlify's file system is read-only, so changes must be committed to GitHub
+    // Store in Netlify Blobs
+    const store = getStore("site-data");
+    await store.set("notification", JSON.stringify(notificationData));
+
     return NextResponse.json({
       success: true,
-      data: notificationData,
-      instructions: "Update public/notification.json in your GitHub repository with this data, then redeploy on Netlify."
+      data: notificationData
     });
   } catch (error) {
     console.error("Notification update error:", error);

@@ -35,21 +35,32 @@ export default function NotificationAdminPage() {
       });
   }, []);
 
-  const handleDownload = () => {
-    const dataStr = JSON.stringify(notification, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "notification.json";
-    link.click();
-    URL.revokeObjectURL(url);
-    setSaveMessage("✓ Downloaded! Now upload to GitHub (see instructions below)");
-    setTimeout(() => setSaveMessage(""), 5000);
-  };
-
   const handleSave = async () => {
-    handleDownload();
+    setSaving(true);
+    setSaveMessage("");
+
+    try {
+      const response = await fetch("/api/notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(notification),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSaveMessage("✓ Notification updated successfully! Live on all devices now.");
+        setTimeout(() => setSaveMessage(""), 5000);
+      } else {
+        setSaveMessage("✗ Failed to update notification");
+      }
+    } catch (error) {
+      setSaveMessage("✗ Error saving notification");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -205,84 +216,35 @@ export default function NotificationAdminPage() {
           )}
 
           {/* Save Button */}
-          <div className="flex items-center justify-between mb-8">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-8 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all shadow-xl shadow-blue-500/30 flex items-center gap-2 disabled:opacity-50"
-            >
-              <Save size={20} />
-              Download notification.json
-            </button>
-            {saveMessage && (
-              <span
-                className={`text-sm font-medium ${
-                  saveMessage.includes("✓") ? "text-green-500" : "text-red-500"
-                }`}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all shadow-xl shadow-blue-500/30 flex items-center gap-2 disabled:opacity-50"
               >
-                {saveMessage}
-              </span>
-            )}
-          </div>
+                <Save size={20} />
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              {saveMessage && (
+                <span
+                  className={`text-sm font-medium ${
+                    saveMessage.includes("✓") ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {saveMessage}
+                </span>
+              )}
+            </div>
 
-          {/* Instructions */}
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-6">
-            <h3 className="text-white font-semibold text-lg mb-4 flex items-center gap-2">
-              <Info size={20} className="text-blue-400" />
-              How to Update the Notification
-            </h3>
-            <div className="space-y-3 text-gray-300 text-sm">
-              <p className="mb-4">
-                Since the site runs on Netlify (serverless), the notification is stored in a file in your GitHub repository. Follow these steps:
+            {/* Info Box */}
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <p className="text-sm text-blue-200 flex items-start gap-2">
+                <Info size={16} className="flex-shrink-0 mt-0.5" />
+                <span>
+                  Changes are instant! Click "Save Changes" and the banner will appear on all devices immediately. No need to redeploy or refresh.
+                </span>
               </p>
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold text-xs">
-                    1
-                  </span>
-                  <div>
-                    <p className="font-medium text-white">Download the notification.json file</p>
-                    <p className="text-gray-400 text-xs mt-1">Click the button above to download the updated notification.json file</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold text-xs">
-                    2
-                  </span>
-                  <div>
-                    <p className="font-medium text-white">Go to GitHub</p>
-                    <p className="text-gray-400 text-xs mt-1">
-                      Visit{" "}
-                      <a
-                        href="https://github.com/it3magic/mcodingwebsite/blob/main/public/notification.json"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:underline"
-                      >
-                        notification.json on GitHub
-                      </a>
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold text-xs">
-                    3
-                  </span>
-                  <div>
-                    <p className="font-medium text-white">Edit the file</p>
-                    <p className="text-gray-400 text-xs mt-1">Click the pencil icon (Edit), paste the contents from your downloaded file, then click "Commit changes"</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold text-xs">
-                    4
-                  </span>
-                  <div>
-                    <p className="font-medium text-white">Netlify will auto-deploy</p>
-                    <p className="text-gray-400 text-xs mt-1">Netlify automatically detects the change and deploys. The banner will be live in ~2 minutes!</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
