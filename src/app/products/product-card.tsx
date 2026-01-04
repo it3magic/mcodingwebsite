@@ -350,7 +350,7 @@ export function ProductCard({ product }: { product: Product }) {
         </Link>
         <p className="text-gray-400 text-sm mb-4">{product.description}</p>
 
-        {/* Dropdown Options */}
+        {/* Dropdown Options - Limited to 2 on card view for compact display */}
         {product.hasOptions && product.options && (
           <div className="space-y-3 mb-4">
             <div>
@@ -392,84 +392,9 @@ export function ProductCard({ product }: { product: Product }) {
               </div>
             )}
 
-            {product.options.dropdown3 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  {product.options.dropdown3.label}
-                </label>
-                <select
-                  value={selectedOption3}
-                  onChange={(e) => setSelectedOption3(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Select...</option>
-                  {product.options.dropdown3.choices.map((choice) => (
-                    <option key={choice} value={choice}>
-                      {choice}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {product.options.dropdown4 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  {product.options.dropdown4.label}
-                </label>
-                <select
-                  value={selectedOption4}
-                  onChange={(e) => setSelectedOption4(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Select...</option>
-                  {product.options.dropdown4.choices.map((choice) => (
-                    <option key={choice} value={choice}>
-                      {choice}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {product.options.dropdown5 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  {product.options.dropdown5.label}
-                </label>
-                <select
-                  value={selectedOption5}
-                  onChange={(e) => setSelectedOption5(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Select...</option>
-                  {product.options.dropdown5.choices.map((choice) => (
-                    <option key={choice} value={choice}>
-                      {choice}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {product.options.dropdown6 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  {product.options.dropdown6.label}
-                </label>
-                <select
-                  value={selectedOption6}
-                  onChange={(e) => setSelectedOption6(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Select...</option>
-                  {product.options.dropdown6.choices.map((choice) => (
-                    <option key={choice} value={choice}>
-                      {choice}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Show "More options" note for products with 3+ dropdowns */}
+            {(product.options.dropdown3 || product.options.dropdown4 || product.options.dropdown5 || product.options.dropdown6) && (
+              <p className="text-xs text-gray-500 italic">+ More options available on product page</p>
             )}
           </div>
         )}
