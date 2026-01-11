@@ -85,8 +85,20 @@ const parseInlineButtons = (text: string): { cleanText: string; buttons: { label
 
   // Remove button markers from text
   cleanText = text.replace(buttonRegex, '').trim();
-  // Clean up any double line breaks left behind
+
+  // Remove markdown-style links [text](url)
+  cleanText = cleanText.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+
+  // Remove bare URLs (http/https)
+  cleanText = cleanText.replace(/https?:\/\/[^\s]+/g, '');
+
+  // Remove any leftover /products/... or /blog/... paths
+  cleanText = cleanText.replace(/\/(?:products|blog|services)\/[^\s\.,!?]+/g, '');
+
+  // Clean up any double line breaks or extra spaces left behind
   cleanText = cleanText.replace(/\n{3,}/g, '\n\n');
+  cleanText = cleanText.replace(/  +/g, ' ');
+  cleanText = cleanText.trim();
 
   return { cleanText, buttons };
 };
@@ -368,11 +380,13 @@ How can I help you today?`,
     setTimeout(() => inputRef.current?.focus(), 100);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
       handleSendMessage();
+      // Keep focus on input
+      e.currentTarget.focus();
     }
   };
 
@@ -445,20 +459,29 @@ How can I help you today?`,
                   </div>
                   {/* Action Buttons */}
                   {message.buttons && message.isBot && (
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="flex flex-col gap-2 mt-3">
+                      <p className="text-xs text-gray-400 flex items-center gap-1">
+                        <span className="animate-pulse">👆</span> Click the button below for details:
+                      </p>
                       {message.buttons.map((button, index) => (
                         <button
                           key={index}
                           onClick={() => handleButtonClick(button.action, message.bookingData)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center space-x-1 ${
-                            button.isPrimary
-                              ? "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white"
-                              : "bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white"
+                          className={`relative px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center space-x-2 overflow-hidden group ${
+                            button.isPrimary || button.action === "whatsapp_booking"
+                              ? "bg-gradient-to-r from-green-600 via-green-500 to-emerald-500 hover:from-green-500 hover:via-green-400 hover:to-emerald-400 text-white shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-[1.02]"
+                              : button.action.startsWith("/products") || button.action.startsWith("/blog")
+                              ? "bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-[1.02]"
+                              : button.action === "whatsapp"
+                              ? "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-[1.02]"
+                              : "bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 border border-white/10 text-white hover:scale-[1.02]"
                           }`}
                         >
-                          <span>{button.label}</span>
+                          {/* Shimmer effect */}
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
+                          <span className="relative">{button.label}</span>
                           {(button.action.startsWith("http") || button.action === "whatsapp" || button.action === "whatsapp_booking") && (
-                            <ExternalLink size={12} />
+                            <ExternalLink size={14} className="relative" />
                           )}
                         </button>
                       ))}
@@ -515,7 +538,7 @@ How can I help you today?`,
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder="Type your message..."
                 disabled={isTyping}
                 className="flex-1 px-4 py-3 bg-zinc-800 border border-white/10 rounded-full text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
