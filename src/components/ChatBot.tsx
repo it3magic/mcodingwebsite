@@ -33,7 +33,7 @@ const quickActions = [
   { label: "Services & Pricing", query: "What services do you offer and what are the prices?" },
   { label: "Book Appointment", query: "I'd like to book an appointment" },
   { label: "Location & Hours", query: "Where are you located and what are your opening hours?" },
-  { label: "Apple CarPlay", query: "Tell me about Apple CarPlay activation for BMW" },
+  { label: "Apple CarPlay", query: "I'm interested in Apple CarPlay activation" },
 ];
 
 // Parse booking data from AI response
@@ -47,7 +47,6 @@ const parseBookingData = (text: string): { cleanText: string; bookingData: Booki
   const bookingContent = bookingMatch[1];
   const cleanText = text.replace(/\{\{BOOKING_READY\}\}[\s\S]*?\{\{\/BOOKING_READY\}\}/, '').trim();
 
-  // Parse the booking details
   const getField = (field: string): string => {
     const match = bookingContent.match(new RegExp(`${field}:\\s*(.+)`, 'i'));
     return match ? match[1].trim() : '';
@@ -62,13 +61,34 @@ const parseBookingData = (text: string): { cleanText: string; bookingData: Booki
     preferredTime: getField('Preferred Time'),
   };
 
-  // Validate that we have all required fields
   const hasAllFields = Object.values(bookingData).every(val => val.length > 0);
 
   return {
     cleanText,
     bookingData: hasAllFields ? bookingData : null
   };
+};
+
+// Parse inline buttons from AI response {{BUTTON:Label|url}}
+const parseInlineButtons = (text: string): { cleanText: string; buttons: { label: string; action: string }[] } => {
+  const buttonRegex = /\{\{BUTTON:([^|]+)\|([^}]+)\}\}/g;
+  const buttons: { label: string; action: string }[] = [];
+  let cleanText = text;
+
+  let match;
+  while ((match = buttonRegex.exec(text)) !== null) {
+    buttons.push({
+      label: match[1].trim(),
+      action: match[2].trim()
+    });
+  }
+
+  // Remove button markers from text
+  cleanText = text.replace(buttonRegex, '').trim();
+  // Clean up any double line breaks left behind
+  cleanText = cleanText.replace(/\n{3,}/g, '\n\n');
+
+  return { cleanText, buttons };
 };
 
 // Generate WhatsApp message from booking data
@@ -114,10 +134,16 @@ export default function ChatBot() {
     }
   }, [isOpen]);
 
+  // Refocus input when typing stops (message sent)
+  useEffect(() => {
+    if (!isTyping && isOpen && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [isTyping, isOpen]);
+
   // Track session start and send welcome message
   useEffect(() => {
     if (isOpen && messages.length === 0 && sessionId) {
-      // Start analytics session
       fetch("/api/chat/analytics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,7 +158,6 @@ export default function ChatBot() {
         })
       }).catch(console.error);
 
-      // Welcome message
       const welcomeMessage: Message = {
         id: `msg_${Date.now()}`,
         text: `Hi there! 👋 I'm the M Coding AI assistant.
@@ -152,7 +177,6 @@ How can I help you today?`,
     }
   }, [isOpen, messages.length, sessionId]);
 
-  // Track analytics for messages
   const trackMessage = useCallback(async (message: Message) => {
     if (!sessionId) return;
 
@@ -176,8 +200,12 @@ How can I help you today?`,
     }
   }, [sessionId]);
 
-  // Get AI response
-  const getAIResponse = async (userMessage: string): Promise<{ text: string; source: "ai" | "fallback" | "error"; bookingData: BookingData | null }> => {
+  const getAIResponse = async (userMessage: string): Promise<{
+    text: string;
+    source: "ai" | "fallback" | "error";
+    bookingData: BookingData | null;
+    inlineButtons: { label: string; action: string }[];
+  }> => {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -195,25 +223,34 @@ How can I help you today?`,
       const data = await response.json();
 
       // Parse for booking data
-      const { cleanText, bookingData } = parseBookingData(data.response);
+      const { cleanText: textAfterBooking, bookingData } = parseBookingData(data.response);
+
+      // Parse for inline buttons
+      const { cleanText, buttons: inlineButtons } = parseInlineButtons(textAfterBooking);
 
       return {
         text: cleanText,
         source: data.source || "ai",
-        bookingData
+        bookingData,
+        inlineButtons
       };
     } catch (error) {
       console.error("AI response error:", error);
       return {
         text: "I apologize, but I'm having trouble right now. Please try again or contact us via WhatsApp at 087 609 6830 for immediate assistance.",
         source: "error",
-        bookingData: null
+        bookingData: null,
+        inlineButtons: []
       };
     }
   };
 
-  // Detect if response should have action buttons
-  const getResponseButtons = (text: string, userMessage: string, bookingData: BookingData | null): { label: string; action: string; isPrimary?: boolean }[] | undefined => {
+  const getResponseButtons = (
+    text: string,
+    userMessage: string,
+    bookingData: BookingData | null,
+    inlineButtons: { label: string; action: string }[]
+  ): { label: string; action: string; isPrimary?: boolean }[] | undefined => {
     // If we have booking data, show the booking button prominently
     if (bookingData) {
       return [
@@ -221,49 +258,15 @@ How can I help you today?`,
       ];
     }
 
-    const lowerText = text.toLowerCase();
-    const lowerUserMsg = userMessage.toLowerCase();
-
-    if (lowerUserMsg.includes("carplay") || lowerText.includes("carplay")) {
-      return [
-        { label: "View CarPlay Details", action: "/products/apple-carplay-activation" },
-        { label: "Book Now", action: "start_booking" }
-      ];
+    // If we have inline buttons from AI, use those
+    if (inlineButtons.length > 0) {
+      return inlineButtons.map((btn, index) => ({
+        ...btn,
+        isPrimary: index === 0 // First button is primary
+      }));
     }
 
-    if (lowerUserMsg.includes("region") || lowerText.includes("region change")) {
-      return [
-        { label: "View Region Change", action: "/products/region-change" },
-        { label: "Get Quote", action: "whatsapp" }
-      ];
-    }
-
-    if (lowerUserMsg.includes("xhp") || lowerText.includes("xhp")) {
-      return [
-        { label: "View XHP Details", action: "/products/bmw-xhp-transmission-remap" },
-        { label: "Book Now", action: "start_booking" }
-      ];
-    }
-
-    if (lowerUserMsg.includes("book") || lowerUserMsg.includes("appointment")) {
-      return undefined; // Let the AI handle booking flow
-    }
-
-    if (lowerUserMsg.includes("service") || lowerUserMsg.includes("price")) {
-      return [
-        { label: "View All Products", action: "/products" },
-        { label: "Book Appointment", action: "start_booking" }
-      ];
-    }
-
-    if (lowerUserMsg.includes("location") || lowerUserMsg.includes("where") || lowerUserMsg.includes("address")) {
-      return [
-        { label: "Get Directions", action: "https://maps.google.com/?q=Ardfinnan,Co.Tipperary,E91YX50" },
-        { label: "Contact Us", action: "/contact" }
-      ];
-    }
-
-    // Default - no buttons, let conversation flow naturally
+    // No automatic buttons - let conversation flow naturally
     return undefined;
   };
 
@@ -271,7 +274,6 @@ How can I help you today?`,
     const messageText = text || inputValue.trim();
     if (!messageText || isTyping) return;
 
-    // Add user message
     const userMessage: Message = {
       id: `msg_${Date.now()}`,
       text: messageText,
@@ -282,16 +284,11 @@ How can I help you today?`,
     setInputValue("");
     setIsTyping(true);
 
-    // Track user message
     trackMessage(userMessage);
-
-    // Update conversation history for AI context
     setConversationHistory(prev => [...prev, { role: "user", content: messageText }]);
 
-    // Get AI response
-    const { text: responseText, source, bookingData } = await getAIResponse(messageText);
+    const { text: responseText, source, bookingData, inlineButtons } = await getAIResponse(messageText);
 
-    // Store booking data if present
     if (bookingData) {
       setCurrentBooking(bookingData);
     }
@@ -301,7 +298,7 @@ How can I help you today?`,
       text: responseText,
       isBot: true,
       timestamp: new Date(),
-      buttons: getResponseButtons(responseText, messageText, bookingData),
+      buttons: getResponseButtons(responseText, messageText, bookingData, inlineButtons),
       source,
       bookingData: bookingData || undefined
     };
@@ -309,20 +306,18 @@ How can I help you today?`,
     setMessages(prev => [...prev, botMessage]);
     setIsTyping(false);
 
-    // Track bot message
     trackMessage(botMessage);
-
-    // Update conversation history
     setConversationHistory(prev => [...prev, { role: "assistant", content: responseText }]);
+
+    // Refocus input after sending
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   const handleButtonClick = async (action: string, messageBookingData?: BookingData) => {
     if (action === "whatsapp_booking") {
-      // Use the booking data from the message or current state
       const booking = messageBookingData || currentBooking;
 
       if (booking) {
-        // Track WhatsApp conversion
         trackWhatsAppClick("ChatBot_Booking");
 
         if (sessionId) {
@@ -342,7 +337,6 @@ How can I help you today?`,
         window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
       }
     } else if (action === "whatsapp") {
-      // Track WhatsApp conversion
       trackWhatsAppClick("ChatBot");
 
       if (sessionId) {
@@ -361,18 +355,23 @@ How can I help you today?`,
       const phoneNumber = "353876096830";
       window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     } else if (action === "start_booking") {
-      // Start the booking flow
       handleSendMessage("I'd like to book an appointment");
     } else if (action.startsWith("http")) {
       window.open(action, '_blank');
+    } else if (action.startsWith("/")) {
+      window.location.href = action;
     } else {
       window.location.href = action;
     }
+
+    // Refocus input after button click
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      e.stopPropagation();
       handleSendMessage();
     }
   };
