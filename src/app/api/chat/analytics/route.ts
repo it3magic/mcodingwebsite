@@ -27,10 +27,10 @@ interface ChatSession {
 // GET - Retrieve analytics (admin only)
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
-  const adminSession = cookieStore.get("admin_session");
+  const adminAuth = cookieStore.get("admin-auth");
 
-  // Simple auth check - in production use proper authentication
-  if (!adminSession?.value) {
+  // Check for admin authentication cookie
+  if (!adminAuth?.value || adminAuth.value !== "authenticated") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -165,9 +165,10 @@ export async function POST(request: NextRequest) {
 // DELETE - Clear all analytics (admin only)
 export async function DELETE(request: NextRequest) {
   const cookieStore = await cookies();
-  const adminSession = cookieStore.get("admin_session");
+  const adminAuth = cookieStore.get("admin-auth");
 
-  if (!adminSession?.value) {
+  // Check for admin authentication cookie
+  if (!adminAuth?.value || adminAuth.value !== "authenticated") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
