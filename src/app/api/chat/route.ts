@@ -15,7 +15,21 @@ const SYSTEM_PROMPT = `You are the AI assistant for M Coding Ireland - Ireland's
 - When asked about availability, ask the customer to provide more details about what service they need
 - We can then come back with a suitable appointment depending on the service required
 
-## Apple CarPlay Eligibility (IMPORTANT)
+## Handling Service Inquiries (IMPORTANT)
+When someone asks about "services" or wants to book a service:
+1. DO NOT immediately mention CarPlay or any specific service
+2. First, ask if they know which service they need
+3. Ask if they are a returning customer or new customer
+4. If they don't know what service they need, direct them to our services page: https://m-coding.ie/services or products page: https://m-coding.ie/products
+5. Once you understand what they need (service type, vehicle model, year), help them contact us via WhatsApp with a prefilled message
+
+## Service Categories
+- Servicing: Oil changes, ZF transmission service, brake service, intake cleaning, injector cleaning
+- Coding: Region changes, Apple CarPlay, feature activation, Speed Limit Info
+- Performance: ECU remapping, XHP transmission tuning
+- Retrofitting: Reversing cameras, ambient lighting, LCI upgrades, headlight repair
+
+## Apple CarPlay Eligibility (Only mention when specifically asked about CarPlay)
 - Only BMW vehicles from 2017 onwards support native Apple CarPlay activation
 - Some 2015/2016 models MIGHT be eligible, but this needs to be checked
 - NO models before 2015 can have CarPlay activated - this is not possible
@@ -23,7 +37,7 @@ const SYSTEM_PROMPT = `You are the AI assistant for M Coding Ireland - Ireland's
 - Standard NBT or CIC systems cannot have CarPlay activated
 - Direct customers to our blog guide: https://m-coding.ie/blog/bmw-idrive-systems-guide
 
-## How to Check iDrive Version (Help customers find this)
+## How to Check iDrive Version (Only when asked about CarPlay or iDrive)
 1. Navigate to Main Menu
 2. Select Navigation
 3. Push controller to the left and select Maps
@@ -67,7 +81,8 @@ What to look for:
 7. If unsure, recommend contacting via WhatsApp for accurate info
 8. Mention location (Ardfinnan, Tipperary) when relevant
 9. Highlight that M Coding is BMW Registered when discussing quality/trust
-10. For CarPlay queries, ALWAYS check vehicle year and explain eligibility`;
+10. For CarPlay queries, ALWAYS check vehicle year and explain eligibility
+11. For general service inquiries, gather details first before suggesting WhatsApp`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -140,6 +155,30 @@ export async function POST(request: NextRequest) {
 function getFallbackResponse(message: string): string {
   const lowerMessage = message.toLowerCase();
 
+  // Service inquiry - general
+  if ((lowerMessage.includes("service") || lowerMessage.includes("help") || lowerMessage.includes("need") || lowerMessage.includes("looking for")) && 
+      !lowerMessage.includes("carplay") && !lowerMessage.includes("car play")) {
+    return `I'd be happy to help you find the right service!
+
+**Are you a returning customer or new to M Coding?**
+
+Do you already know which service you need? If not, here are our main service areas:
+
+• **Servicing** - Oil changes, ZF transmission, intake cleaning
+• **Coding** - Region changes, feature activation
+• **Performance** - ECU remapping, XHP transmission tuning
+• **Retrofitting** - Cameras, lighting, headlight repair
+
+Browse our full range: https://m-coding.ie/services
+
+Once you know what you need, let me know your:
+1. Vehicle model (e.g., BMW F30 320d)
+2. Year of manufacture
+3. The service you're interested in
+
+I'll then connect you with our team on WhatsApp!`;
+  }
+
   if (lowerMessage.includes("price") || lowerMessage.includes("cost") || lowerMessage.includes("how much")) {
     return `Here are some of our popular services:
 
@@ -149,7 +188,13 @@ function getFallbackResponse(message: string): string {
 • ZF Transmission Service - From €550
 • Injector Cleaning - From €120
 
-For a specific quote, please contact us via WhatsApp at 087 609 6830!`;
+View all pricing: https://m-coding.ie/products
+
+For a specific quote, please let me know:
+1. Your vehicle model and year
+2. Which service you're interested in
+
+I'll then connect you with our team!`;
   }
 
   if (lowerMessage.includes("location") || lowerMessage.includes("where") || lowerMessage.includes("address")) {
@@ -187,13 +232,14 @@ Contact us via WhatsApp at 087 609 6830 for the fastest response!`;
   }
 
   if (lowerMessage.includes("book") || lowerMessage.includes("appointment")) {
-    return `To book an appointment, you can:
+    return `I'd be happy to help you book an appointment!
 
-1. WhatsApp us at 087 609 6830 (fastest)
-2. Fill out our contact form on the website
-3. Email: mcodingireland@gmail.com
+First, please tell me:
+1. **What service do you need?** (Or browse: https://m-coding.ie/products)
+2. **Your vehicle** - Model and year (e.g., BMW F30 320d 2015)
+3. **Are you a returning customer?**
 
-We typically respond within minutes during business hours!`;
+Once I have these details, I'll connect you with our team on WhatsApp to confirm your booking!`;
   }
 
   if (lowerMessage.includes("carplay") || lowerMessage.includes("car play") || lowerMessage.includes("apple play")) {
@@ -234,12 +280,35 @@ Read our complete iDrive guide: https://m-coding.ie/blog/bmw-idrive-systems-guid
 Need help? Send us your vehicle details on WhatsApp at 087 609 6830!`;
   }
 
-  return `Thanks for your message! I can help with:
+  if (lowerMessage.includes("returning") || lowerMessage.includes("been before") || lowerMessage.includes("previous")) {
+    return `Welcome back! Great to hear you're a returning customer.
 
-• Services & pricing information
-• Booking appointments
-• Location & opening hours
-• Product details
+What can we help you with today? Please let me know:
+1. Which service you need
+2. Your vehicle details (if different from before)
 
-For the most accurate information, you can also reach us directly via WhatsApp at 087 609 6830.`;
+I'll then connect you with our team on WhatsApp to arrange your appointment!`;
+  }
+
+  if (lowerMessage.includes("new customer") || lowerMessage.includes("first time") || lowerMessage.includes("never been")) {
+    return `Welcome to M Coding! We're Ireland's first complete BMW & MINI specialist.
+
+To help you get started, please tell me:
+1. **What service are you looking for?**
+   (Not sure? Browse: https://m-coding.ie/services)
+2. **Your vehicle** - Model and year
+3. **Any specific issues or requirements?**
+
+Once I have these details, I'll connect you with our team on WhatsApp!`;
+  }
+
+  return `Thanks for your message! I'd be happy to help.
+
+**What are you looking for today?**
+
+• Need a specific service? Tell me your vehicle and what you need
+• Not sure what you need? Browse our services: https://m-coding.ie/services
+• Want to see pricing? Check our products: https://m-coding.ie/products
+
+Just let me know and I'll guide you through!`;
 }
