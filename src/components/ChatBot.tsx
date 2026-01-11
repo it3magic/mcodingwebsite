@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, Bot, User, ExternalLink, ChevronDown, Sparkles } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, ExternalLink, ChevronDown, Sparkles, Calendar } from "lucide-react";
 import { trackWhatsAppClick } from "@/components/GoogleAnalytics";
 
 interface Message {
@@ -9,8 +9,18 @@ interface Message {
   text: string;
   isBot: boolean;
   timestamp: Date;
-  buttons?: { label: string; action: string }[];
+  buttons?: { label: string; action: string; isPrimary?: boolean }[];
   source?: "ai" | "fallback" | "error";
+  bookingData?: BookingData;
+}
+
+interface BookingData {
+  service: string;
+  vehicle: string;
+  registration: string;
+  contact: string;
+  preferredDate: string;
+  preferredTime: string;
 }
 
 // Generate unique session ID
@@ -21,10 +31,59 @@ const generateSessionId = () => {
 // Quick action buttons for the chat
 const quickActions = [
   { label: "Services & Pricing", query: "What services do you offer and what are the prices?" },
-  { label: "Book Appointment", query: "How do I book an appointment?" },
+  { label: "Book Appointment", query: "I'd like to book an appointment" },
   { label: "Location & Hours", query: "Where are you located and what are your opening hours?" },
   { label: "Apple CarPlay", query: "Tell me about Apple CarPlay activation for BMW" },
 ];
+
+// Parse booking data from AI response
+const parseBookingData = (text: string): { cleanText: string; bookingData: BookingData | null } => {
+  const bookingMatch = text.match(/\{\{BOOKING_READY\}\}([\s\S]*?)\{\{\/BOOKING_READY\}\}/);
+
+  if (!bookingMatch) {
+    return { cleanText: text, bookingData: null };
+  }
+
+  const bookingContent = bookingMatch[1];
+  const cleanText = text.replace(/\{\{BOOKING_READY\}\}[\s\S]*?\{\{\/BOOKING_READY\}\}/, '').trim();
+
+  // Parse the booking details
+  const getField = (field: string): string => {
+    const match = bookingContent.match(new RegExp(`${field}:\\s*(.+)`, 'i'));
+    return match ? match[1].trim() : '';
+  };
+
+  const bookingData: BookingData = {
+    service: getField('Service'),
+    vehicle: getField('Vehicle'),
+    registration: getField('Registration'),
+    contact: getField('Contact'),
+    preferredDate: getField('Preferred Date'),
+    preferredTime: getField('Preferred Time'),
+  };
+
+  // Validate that we have all required fields
+  const hasAllFields = Object.values(bookingData).every(val => val.length > 0);
+
+  return {
+    cleanText,
+    bookingData: hasAllFields ? bookingData : null
+  };
+};
+
+// Generate WhatsApp message from booking data
+const generateWhatsAppBookingMessage = (booking: BookingData): string => {
+  return `Hi! I'd like to book an appointment:
+
+📋 *Service Required:* ${booking.service}
+🚗 *Vehicle:* ${booking.vehicle}
+🔢 *Registration:* ${booking.registration}
+📞 *Contact Number:* ${booking.contact}
+📅 *Preferred Date:* ${booking.preferredDate}
+⏰ *Preferred Time:* ${booking.preferredTime}
+
+Please let me know if this slot is available. Thank you!`;
+};
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,6 +92,7 @@ export default function ChatBot() {
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
   const [conversationHistory, setConversationHistory] = useState<{role: string; content: string}[]>([]);
+  const [currentBooking, setCurrentBooking] = useState<BookingData | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -77,14 +137,14 @@ export default function ChatBot() {
         id: `msg_${Date.now()}`,
         text: `Hi there! 👋 I'm the M Coding AI assistant.
 
-I can help you with information about our BMW & MINI services, pricing, booking, and more.
+I can help you with information about our BMW & MINI services, pricing, booking appointments, and more.
 
 How can I help you today?`,
         isBot: true,
         timestamp: new Date(),
         buttons: [
           { label: "View Services", action: "/services" },
-          { label: "Get a Quote", action: "whatsapp" }
+          { label: "Book Appointment", action: "start_booking" }
         ],
         source: "ai"
       };
@@ -117,14 +177,14 @@ How can I help you today?`,
   }, [sessionId]);
 
   // Get AI response
-  const getAIResponse = async (userMessage: string): Promise<{ text: string; source: "ai" | "fallback" | "error" }> => {
+  const getAIResponse = async (userMessage: string): Promise<{ text: string; source: "ai" | "fallback" | "error"; bookingData: BookingData | null }> => {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMessage,
-          conversationHistory: conversationHistory.slice(-6), // Last 6 messages
+          conversationHistory: conversationHistory.slice(-10),
         })
       });
 
@@ -133,28 +193,41 @@ How can I help you today?`,
       }
 
       const data = await response.json();
+
+      // Parse for booking data
+      const { cleanText, bookingData } = parseBookingData(data.response);
+
       return {
-        text: data.response,
-        source: data.source || "ai"
+        text: cleanText,
+        source: data.source || "ai",
+        bookingData
       };
     } catch (error) {
       console.error("AI response error:", error);
       return {
         text: "I apologize, but I'm having trouble right now. Please try again or contact us via WhatsApp at 087 609 6830 for immediate assistance.",
-        source: "error"
+        source: "error",
+        bookingData: null
       };
     }
   };
 
   // Detect if response should have action buttons
-  const getResponseButtons = (text: string, userMessage: string): { label: string; action: string }[] | undefined => {
+  const getResponseButtons = (text: string, userMessage: string, bookingData: BookingData | null): { label: string; action: string; isPrimary?: boolean }[] | undefined => {
+    // If we have booking data, show the booking button prominently
+    if (bookingData) {
+      return [
+        { label: "📅 Send Booking Request via WhatsApp", action: "whatsapp_booking", isPrimary: true }
+      ];
+    }
+
     const lowerText = text.toLowerCase();
     const lowerUserMsg = userMessage.toLowerCase();
 
     if (lowerUserMsg.includes("carplay") || lowerText.includes("carplay")) {
       return [
         { label: "View CarPlay Details", action: "/products/apple-carplay-activation" },
-        { label: "Book Now", action: "whatsapp" }
+        { label: "Book Now", action: "start_booking" }
       ];
     }
 
@@ -168,21 +241,18 @@ How can I help you today?`,
     if (lowerUserMsg.includes("xhp") || lowerText.includes("xhp")) {
       return [
         { label: "View XHP Details", action: "/products/bmw-xhp-transmission-remap" },
-        { label: "Book Now", action: "whatsapp" }
+        { label: "Book Now", action: "start_booking" }
       ];
     }
 
     if (lowerUserMsg.includes("book") || lowerUserMsg.includes("appointment")) {
-      return [
-        { label: "Book via WhatsApp", action: "whatsapp" },
-        { label: "Contact Form", action: "/contact" }
-      ];
+      return undefined; // Let the AI handle booking flow
     }
 
     if (lowerUserMsg.includes("service") || lowerUserMsg.includes("price")) {
       return [
         { label: "View All Products", action: "/products" },
-        { label: "Get Custom Quote", action: "whatsapp" }
+        { label: "Book Appointment", action: "start_booking" }
       ];
     }
 
@@ -193,10 +263,8 @@ How can I help you today?`,
       ];
     }
 
-    // Default buttons for most responses
-    return [
-      { label: "Chat with Team", action: "whatsapp" }
-    ];
+    // Default - no buttons, let conversation flow naturally
+    return undefined;
   };
 
   const handleSendMessage = async (text?: string) => {
@@ -221,15 +289,21 @@ How can I help you today?`,
     setConversationHistory(prev => [...prev, { role: "user", content: messageText }]);
 
     // Get AI response
-    const { text: responseText, source } = await getAIResponse(messageText);
+    const { text: responseText, source, bookingData } = await getAIResponse(messageText);
+
+    // Store booking data if present
+    if (bookingData) {
+      setCurrentBooking(bookingData);
+    }
 
     const botMessage: Message = {
       id: `msg_${Date.now()}_bot`,
       text: responseText,
       isBot: true,
       timestamp: new Date(),
-      buttons: getResponseButtons(responseText, messageText),
-      source
+      buttons: getResponseButtons(responseText, messageText, bookingData),
+      source,
+      bookingData: bookingData || undefined
     };
 
     setMessages(prev => [...prev, botMessage]);
@@ -242,8 +316,32 @@ How can I help you today?`,
     setConversationHistory(prev => [...prev, { role: "assistant", content: responseText }]);
   };
 
-  const handleButtonClick = async (action: string) => {
-    if (action === "whatsapp") {
+  const handleButtonClick = async (action: string, messageBookingData?: BookingData) => {
+    if (action === "whatsapp_booking") {
+      // Use the booking data from the message or current state
+      const booking = messageBookingData || currentBooking;
+
+      if (booking) {
+        // Track WhatsApp conversion
+        trackWhatsAppClick("ChatBot_Booking");
+
+        if (sessionId) {
+          fetch("/api/chat/analytics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "whatsapp_conversion",
+              sessionId,
+              data: { type: "booking", ...booking }
+            })
+          }).catch(console.error);
+        }
+
+        const message = generateWhatsAppBookingMessage(booking);
+        const phoneNumber = "353876096830";
+        window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+      }
+    } else if (action === "whatsapp") {
       // Track WhatsApp conversion
       trackWhatsAppClick("ChatBot");
 
@@ -262,6 +360,9 @@ How can I help you today?`,
       const message = "Hi! I was chatting with your website assistant and would like to speak with your team.";
       const phoneNumber = "353876096830";
       window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    } else if (action === "start_booking") {
+      // Start the booking flow
+      handleSendMessage("I'd like to book an appointment");
     } else if (action.startsWith("http")) {
       window.open(action, '_blank');
     } else {
@@ -349,13 +450,17 @@ How can I help you today?`,
                       {message.buttons.map((button, index) => (
                         <button
                           key={index}
-                          onClick={() => handleButtonClick(button.action)}
-                          className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-white/10 rounded-full text-xs font-medium text-white transition-colors flex items-center space-x-1"
+                          onClick={() => handleButtonClick(button.action, message.bookingData)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center space-x-1 ${
+                            button.isPrimary
+                              ? "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white"
+                              : "bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white"
+                          }`}
                         >
                           <span>{button.label}</span>
-                          {button.action.startsWith("http") || button.action === "whatsapp" ? (
+                          {(button.action.startsWith("http") || button.action === "whatsapp" || button.action === "whatsapp_booking") && (
                             <ExternalLink size={12} />
-                          ) : null}
+                          )}
                         </button>
                       ))}
                     </div>
