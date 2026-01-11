@@ -65,18 +65,6 @@ If your Netlify site (https://m-coding.ie) has auto-deployment enabled:
 - ✅ API Routes
 - ✅ Dynamic Routes
 
-## Optional: Skew Protection
-
-To prevent client-side errors when new deployments go live while users are active:
-
-1. Add environment variable in Netlify Dashboard:
-   - Name: `NETLIFY_NEXT_SKEW_PROTECTION`
-   - Value: `true`
-
-2. Redeploy the site
-
-This ensures users on older deployment versions continue to work correctly until they refresh.
-
 ## Build Verification
 
 Local build test completed successfully:
@@ -99,14 +87,6 @@ If deployment still fails:
 2. **Verify Node version**: Ensure Netlify uses Node 20 (configured in netlify.toml)
 3. **Clear build cache**: In Netlify, go to Site Settings → Build & Deploy → Clear cache and retry
 4. **Check environment variables**: Ensure no conflicting env vars are set
-
-## Next Steps
-
-1. Monitor the deployment at https://app.netlify.com
-2. Once deployed, test the live site at https://m-coding.ie
-3. Verify all pages load correctly
-4. Test dynamic routes (product pages)
-5. Check contact forms and interactive features
 
 ## Additional Resources
 
