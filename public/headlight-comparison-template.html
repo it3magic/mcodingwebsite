@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMW F10 Pre-LCI Xenon Headlight Comparison - M Coding Ireland</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 60px;
+      background: linear-gradient(135deg, #0066FF 0%, #8855CC 50%, #FF0000 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      position: relative;
+    }
+
+    .headlight-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .label-badge {
+      padding: 10px 28px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .label-badge.non-adaptive {
+      background: linear-gradient(135deg, #1a1a1a, #222);
+      border: 1px solid #333;
+      color: #ccc;
+    }
+
+    .label-badge.adaptive {
+      background: linear-gradient(135deg, #0066FF 0%, #8855CC 50%, #FF0000 100%);
+      color: #fff;
+    }
+
+    .image-container {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background-color: #1a1a1a;
+      border-radius: 16px;
+      border: 2px solid #2a2a2a;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+      padding: 60px 20px 20px;
+    }
+
+    .feature-callout {
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 10px;
+      padding: 14px 18px;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .feature-dot.gray {
+      background-color: #888;
+    }
+
+    .feature-dot.gradient {
+      background: linear-gradient(135deg, #0066FF 0%, #FF0000 100%);
+    }
+
+    .feature-text {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .card-info {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .card-title {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .card-subtitle {
+      font-size: 16px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+
+    .badges {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .option-badge {
+      padding: 10px 18px;
+      background-color: #1a1a1a;
+      border-radius: 10px;
+      border: 1px solid #333;
+    }
+
+    .option-badge.highlight {
+      background: linear-gradient(135deg, rgba(0,102,255,0.2) 0%, rgba(255,0,0,0.2) 100%);
+    }
+
+    .option-code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .option-code.white {
+      color: #fff;
+    }
+
+    .option-text {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .option-text.green {
+      color: #4ade80;
+    }
+
+    /* VS Badge */
+    .vs-badge {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0066FF 0%, #8855CC 50%, #FF0000 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(136, 85, 204, 0.4);
+      z-index: 10;
+    }
+
+    .vs-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Info Box */
+    .info-box {
+      margin-top: 60px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      background: linear-gradient(135deg, #1a1a1a 0%, #1f1f1f 50%, #1a1a1a 100%);
+      border-radius: 16px;
+      padding: 28px 32px;
+      border: 1px solid #2a2a2a;
+    }
+
+    .info-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-icon {
+      width: 22px;
+      height: 22px;
+      fill: #0066FF;
+    }
+
+    .info-text {
+      font-size: 16px;
+      color: #888;
+      line-height: 1.7;
+    }
+
+    .info-text strong {
+      color: #fff;
+    }
+
+    /* Branding */
+    .branding {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 12px;
+      color: #444;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Placeholder for images */
+    .placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a1a, #222);
+      color: #444;
+      font-size: 14px;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Title -->
+    <h1 class="title">BMW F10 Pre-LCI Xenon: How to Identify Your Headlights</h1>
+
+    <!-- Comparison Grid -->
+    <div class="comparison-grid">
+      <!-- Non-Adaptive -->
+      <div class="headlight-card">
+        <div class="label-badge non-adaptive">Non-Adaptive</div>
+
+        <div class="image-container">
+          <!-- Replace src with your non-adaptive headlight image -->
+          <img src="/headlights/non-adaptive.png" alt="BMW F10 Pre-LCI Non-Adaptive Xenon Headlight">
+          <div class="image-overlay">
+            <div class="feature-callout">
+              <span class="feature-dot gray"></span>
+              <span class="feature-text">Smooth projector lens surface</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-info">
+          <h2 class="card-title">Standard Xenon</h2>
+          <p class="card-subtitle">(Bi-Xenon)</p>
+          <div class="badges">
+            <div class="option-badge">
+              <span class="option-code">S522A</span>
+            </div>
+            <div class="option-badge">
+              <span class="option-text">No swivel function</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VS Badge -->
+      <div class="vs-badge">
+        <span class="vs-text">VS</span>
+      </div>
+
+      <!-- Adaptive -->
+      <div class="headlight-card">
+        <div class="label-badge adaptive">Adaptive</div>
+
+        <div class="image-container">
+          <!-- Replace src with your adaptive headlight image -->
+          <img src="/headlights/adaptive.png" alt="BMW F10 Pre-LCI Adaptive Xenon Headlight">
+          <div class="image-overlay">
+            <div class="feature-callout">
+              <span class="feature-dot gradient"></span>
+              <span class="feature-text">Hatched/lined projector lens</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-info">
+          <h2 class="card-title">Adaptive Xenon</h2>
+          <p class="card-subtitle">(AHL - Adaptive Headlights)</p>
+          <div class="badges">
+            <div class="option-badge highlight">
+              <span class="option-code white">S524A</span>
+            </div>
+            <div class="option-badge">
+              <span class="option-text green">Swivel function</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <h3 class="info-title">
+        <svg class="info-icon" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        How to Tell the Difference
+      </h3>
+      <p class="info-text">
+        Look closely at the <strong>projector lens surface</strong>. The non-adaptive xenon has a <strong>smooth, clear surface</strong>, while the adaptive xenon has a distinctive <strong>hatched or lined pattern</strong> visible on the inner lens. The adaptive headlights swivel when you turn the steering wheel to illuminate corners.
+      </p>
+    </div>
+
+    <!-- Branding -->
+    <div class="branding">M Coding Ireland</div>
+  </div>
+</body>
+</html>
