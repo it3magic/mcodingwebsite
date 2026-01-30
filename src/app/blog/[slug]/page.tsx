@@ -259,7 +259,7 @@ export default async function BlogPostPage({
                   li: ({node, ...props}) => <li className="text-gray-300" {...props} />,
                   strong: ({node, children, ...props}) => {
                     // Check if the strong element contains a link - if so, render just the children (link will be styled as button)
-                    const hasLink = node?.children?.some((child: any) => child.type === 'element' && child.tagName === 'a');
+                    const hasLink = node?.children?.some((child: { type?: string; tagName?: string }) => child.type === 'element' && child.tagName === 'a');
                     if (hasLink) {
                       return <>{children}</>;
                     }
