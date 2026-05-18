@@ -1,0 +1,14 @@
+# robots.txt for M Coding Ireland
+# https://m-coding.ie
+
+User-agent: *
+Allow: /
+
+# Disallow admin or private sections if any
+# Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://m-coding.ie/sitemap.xml
+
+# Crawl-delay (optional)
+Crawl-delay: 10
