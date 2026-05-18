@@ -104,6 +104,99 @@ function ACEComparisonTable() {
   );
 }
 
+// CarPlay/Android Auto Retrofit Comparison Table Component
+function CarPlayComparisonTable() {
+  const features = [
+    { feature: "Uses Original Screen", mmiBox: true, screen: false, highlight: null },
+    { feature: "Touchscreen Control", mmiBox: false, screen: "CarPlay/AA Only", highlight: "screen" },
+    { feature: "Screen Size", mmiBox: "Original", screen: "10.25\"", highlight: "screen" },
+    { feature: "Resolution Upgrade", mmiBox: false, screen: true, highlight: "screen" },
+    { feature: "OEM Appearance", mmiBox: true, screen: "Partial", highlight: "mmi" },
+    { feature: "Wireless CarPlay", mmiBox: true, screen: true, highlight: null },
+    { feature: "Wireless Android Auto", mmiBox: true, screen: true, highlight: null },
+    { feature: "iDrive Controller", mmiBox: "Required", screen: "Optional", highlight: null },
+    { feature: "Original iDrive Retained", mmiBox: true, screen: true, highlight: null },
+    { feature: "Standalone Android OS", mmiBox: false, screen: false, highlight: null },
+    { feature: "Installation Time", mmiBox: "2 Hours", screen: "2-3 Hours", highlight: null },
+    { feature: "F-Series Price (Fitted)", mmiBox: "€340", screen: "From €380", highlight: "mmi" },
+    { feature: "G-Series Price (Fitted)", mmiBox: "€380", screen: "N/A", highlight: null },
+  ];
+
+  const renderValue = (value: string | boolean, highlight: string | null, column: "mmi" | "screen") => {
+    const isHighlighted = highlight === column || (highlight === "mmi" && column === "mmi") || (highlight === "screen" && column === "screen");
+
+    if (typeof value === "boolean") {
+      return value ? (
+        <div className={`flex justify-center ${isHighlighted ? "text-green-400" : "text-green-500/70"}`}>
+          <Check size={20} strokeWidth={3} />
+        </div>
+      ) : (
+        <div className="flex justify-center text-gray-600">
+          <X size={20} strokeWidth={2} />
+        </div>
+      );
+    }
+    return (
+      <span className={`text-sm ${isHighlighted ? "text-white font-semibold" : "text-gray-300"}`}>
+        {value}
+      </span>
+    );
+  };
+
+  return (
+    <div className="my-8 rounded-2xl overflow-hidden border border-white/10 bg-zinc-900/50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-red-600/20 p-4 border-b border-white/10">
+        <h3 className="text-xl font-bold text-white text-center">MMI Box vs Aftermarket Screen</h3>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-white/10">
+              <th className="text-left p-4 text-gray-400 font-medium text-sm w-1/3">Feature</th>
+              <th className="text-center p-4 w-1/3">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-blue-400 font-bold">MMI Box</span>
+                  <span className="text-xs text-gray-500">Original Screen</span>
+                </div>
+              </th>
+              <th className="text-center p-4 w-1/3 bg-gradient-to-b from-purple-500/10 to-transparent">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-purple-400 font-bold">Aftermarket Screen</span>
+                  <span className="text-xs text-gray-500">10.25" Touchscreen</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {features.map((row, index) => (
+              <tr
+                key={index}
+                className={`border-b border-white/5 hover:bg-white/5 transition-colors ${
+                  index % 2 === 0 ? "bg-black/20" : ""
+                }`}
+              >
+                <td className="p-4 text-gray-300 text-sm font-medium">{row.feature}</td>
+                <td className="p-4 text-center">{renderValue(row.mmiBox, row.highlight, "mmi")}</td>
+                <td className="p-4 text-center bg-purple-500/5">{renderValue(row.screen, row.highlight, "screen")}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer */}
+      <div className="p-4 bg-black/30 border-t border-white/10">
+        <p className="text-xs text-gray-500 text-center">
+          All prices include professional fitting. Linux-based screens run CarPlay/Android Auto only.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const product = products.find((p) => p.slug === slug);
@@ -306,7 +399,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     },
   };
 
-  // Get available fluid options for ZF/DCT transmission based on transmission type
+  // Pricing map for CarPlay/Android Auto Retrofit
+  const carplayRetrofitPricing: Record<string, number> = {
+    // MMI Box options
+    "F-Series BMW": 340,
+    "G-Series BMW": 380,
+    // Aftermarket Screen options
+    "F10 CIC": 400,
+    "F10 NBT": 380,
+    "F30 NBT": 380,
+  };
+
+  // Get available options for dropdown2 based on dropdown1 selection
   const availableFluidOptions = useMemo(() => {
     if (product.name === "ZF / DCT Transmission Service" && selectedOption1) {
       if (selectedOption1 === "DCT Transmission (M3/M4/M5 etc)") {
@@ -317,12 +421,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         return ["Genuine ZF Fluid", "Aftermarket Fluid (exceeds ZF specifications)"];
       }
     }
+    // CarPlay/Android Auto Retrofit - dynamic dropdown based on solution type
+    if (product.name === "Apple CarPlay & Android Auto Retrofit" && selectedOption1) {
+      if (selectedOption1 === "MMI Box (Uses Original Screen)") {
+        return ["F-Series BMW", "G-Series BMW"];
+      } else if (selectedOption1 === "Aftermarket Screen (10.25\" Touchscreen)") {
+        return ["F10 CIC", "F10 NBT", "F30 NBT"];
+      }
+    }
     return product.options?.dropdown2?.choices || [];
   }, [product.name, product.options, selectedOption1]);
 
-  // Reset fluid selection when transmission type changes
+  // Reset dropdown2 selection when dropdown1 changes for products with dynamic options
   useEffect(() => {
-    if (product.name === "ZF / DCT Transmission Service") {
+    if (product.name === "ZF / DCT Transmission Service" || product.name === "Apple CarPlay & Android Auto Retrofit") {
       setSelectedOption2("");
     }
   }, [selectedOption1, product.name]);
@@ -340,6 +452,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       }
     }
   }, [selectedOption1, product.name]);
+
+  // Set appropriate image index when vehicle selection changes for CarPlay Retrofit
+  useEffect(() => {
+    if (product.name === "Apple CarPlay & Android Auto Retrofit" && selectedOption2) {
+      // Images array: [mmi1.png (index 0), f10.png (index 1), f30.png (index 2)]
+      if (selectedOption2 === "F10 CIC" || selectedOption2 === "F10 NBT") {
+        setCurrentImageIndex(1); // f10.png
+      } else if (selectedOption2 === "F30 NBT") {
+        setCurrentImageIndex(2); // f30.png
+      } else {
+        setCurrentImageIndex(0); // mmi1.png (default for MMI Box options)
+      }
+    }
+  }, [selectedOption2, product.name]);
 
   const displayPrice = useMemo(() => {
     if (product.name === "Region Change" && selectedOption1) {
@@ -399,8 +525,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       total += aceFittingPricing[model]?.[fitting] || 0;
       return `€${total}`;
     }
+    if (product.name === "Apple CarPlay & Android Auto Retrofit" && selectedOption2) {
+      return `€${carplayRetrofitPricing[selectedOption2] || 340}`;
+    }
     return product.price;
-  }, [product.name, product.price, selectedOption1, selectedOption2, selectedOption3, selectedOption4, selectedOption5, selectedOption6, aceModelPricing, aceFittingPricing]);
+  }, [product.name, product.price, selectedOption1, selectedOption2, selectedOption3, selectedOption4, selectedOption5, selectedOption6, aceModelPricing, aceFittingPricing, carplayRetrofitPricing]);
 
   // Use product images directly (all images always visible in gallery)
   const displayImages = product.images;
@@ -411,6 +540,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     if (imagePath.includes("ace-3.0-fr")) return "3.0 PRO / 3.1 F+R";
     if (imagePath.includes("ace-3.1")) return "3.1 Front";
     if (imagePath.includes("ace-3.0")) return "3.0 Main";
+    return null;
+  };
+
+  // Labels for CarPlay Retrofit thumbnail images
+  const getCarplayImageLabel = (imagePath: string): string | null => {
+    if (product.name !== "Apple CarPlay & Android Auto Retrofit") return null;
+    if (imagePath.includes("mmi1")) return "MMI Box";
+    if (imagePath.includes("f10")) return "F10 Screen";
+    if (imagePath.includes("f30")) return "F30 Screen";
     return null;
   };
 
@@ -813,6 +951,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               <div className="grid grid-cols-4 gap-3">
                 {displayImages.map((image, index) => {
                   const aceLabel = getAceImageLabel(image);
+                  const carplayLabel = getCarplayImageLabel(image);
+                  const thumbnailLabel = aceLabel || carplayLabel;
                   return (
                     <button
                       key={index}
@@ -825,11 +965,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                       style={{ aspectRatio: "1" }}
                     >
                       <img src={image} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
-                      {/* ACE Image Label */}
-                      {aceLabel && (
+                      {/* Thumbnail Label (ACE or CarPlay) */}
+                      {thumbnailLabel && (
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-4 pb-1.5 px-1">
                           <span className="text-[9px] font-bold text-white uppercase tracking-wide block text-center leading-tight">
-                            {aceLabel}
+                            {thumbnailLabel}
                           </span>
                         </div>
                       )}
@@ -921,6 +1061,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
               {/* ACE Comparison Table - Only for Advanced Car Eye product */}
               {product.name === "BMW Advanced Car Eye Dashcam" && <ACEComparisonTable />}
+
+              {/* CarPlay/Android Auto Retrofit Comparison Table */}
+              {product.name === "Apple CarPlay & Android Auto Retrofit" && <CarPlayComparisonTable />}
 
               {/* Blog Post Link */}
               {product.blogPostUrl && (

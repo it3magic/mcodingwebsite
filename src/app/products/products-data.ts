@@ -221,7 +221,7 @@ export const products: Product[] = [
   {
     id: 5,
     slug: "apple-carplay-activation",
-    name: "Apple Carplay Activation",
+    name: "Native Apple CarPlay Activation",
     category: "Coding",
     price: "€120",
     images: [
@@ -232,28 +232,57 @@ export const products: Product[] = [
     ],
     video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     hasVideo: false, // Disabled for now - will be enabled when custom video is added
-    description: "In-House Apple CarPlay activation service",
-    fullDescription: "Enable Native Apple carplay in cars with NBT EVO idrive system",
+    description: "Native Apple CarPlay activation for NBT EVO iDrive systems",
+    fullDescription: `Enable **Native Apple CarPlay** on your BMW with NBT EVO iDrive system. This is a software-based activation that unlocks the factory CarPlay feature built into your vehicle.
+
+**Important:** This service is for **NBT EVO systems only** and supports **Apple CarPlay only** - Android Auto is not supported natively on NBT EVO.
+
+Not sure which iDrive system you have? **[Check our iDrive identification guide](/blog/bmw-idrive-systems-guide)** to find out.
+
+**Need Android Auto?** If you need Android Auto support, or have a different iDrive system (CIC, NBT, MGU), check out our **[CarPlay & Android Auto Retrofit](/products/carplay-android-auto-retrofit)** which works with all BMW models.`,
     features: [
-      "Natively supported",
+      "Native BMW CarPlay integration",
+      "Wireless connectivity",
       "Fullscreen support",
-      "No aftermarket adepters",
-      "Right Hand Drive",
-      "High Quality Wifi antenna fitting included",
-      "Wireless Connectivity",
+      "No aftermarket adapters required",
+      "High quality WiFi antenna included",
+      "Retains all original iDrive functions",
+      "Steering wheel controls supported",
+      "30 minute installation",
     ],
     specifications: {
-      "Service Type": "Coding",
-      "iDrive System": "NBT EVO",
+      "Service Type": "Software Activation",
+      "iDrive System": "NBT EVO Only",
+      "Supported": "Apple CarPlay Only",
       "Connection": "Wireless",
       "Installation": "In-House",
       "Service Time": "30 minutes",
       "Warranty": "12 months",
     },
-    compatibility: "Compatible with BMW models equipped with NBT EVO iDrive system. Not compatible with CIC or NBT systems.",
-    installation: "In-House installation service. Includes high-quality WiFi antenna fitting and full system coding. Service time approximately 30 minutes",
+    blogPostUrl: "/blog/bmw-idrive-systems-guide",
+    blogPostLabel: "Check Your iDrive System",
+    compatibility: "Compatible with BMW models equipped with NBT EVO iDrive system (2016+). Not compatible with CIC, NBT, or MGU systems. This service activates Apple CarPlay only - Android Auto is not supported on NBT EVO.",
+    installation: "In-House installation service. Includes high-quality WiFi antenna fitting and full system coding. Service time approximately 30 minutes. No hardware modifications required.",
     inStock: true,
     featured: false,
+    faqs: [
+      {
+        question: "Does this support Android Auto?",
+        answer: "No, NBT EVO systems only support Apple CarPlay natively. Android Auto is not available on NBT EVO. If you need Android Auto, check out our CarPlay & Android Auto Retrofit product which uses an MMI box or aftermarket screen."
+      },
+      {
+        question: "How do I know if I have NBT EVO?",
+        answer: "NBT EVO systems are found in BMW F-series vehicles from 2016 onwards. Check our iDrive identification guide or contact us with your vehicle details and we can confirm."
+      },
+      {
+        question: "Is the connection wireless?",
+        answer: "Yes, once activated your iPhone will connect wirelessly to CarPlay. We include a high-quality WiFi antenna to ensure reliable connectivity."
+      },
+      {
+        question: "Will I lose any existing features?",
+        answer: "No, all your existing iDrive features remain fully functional. CarPlay is simply added as an additional feature."
+      },
+    ],
   },
   {
     id: 6,
@@ -737,6 +766,81 @@ The **ACE 3.0 PRO** includes both front and rear cameras as standard, a built-in
       {
         question: "Is the footage admissible for insurance claims?",
         answer: "Yes, the GPS-stamped footage with date, time, location, and speed data is accepted by insurance companies and can be invaluable for accident claims or disputes."
+      },
+    ],
+  },
+  {
+    id: 14,
+    slug: "carplay-android-auto-retrofit",
+    name: "Apple CarPlay & Android Auto Retrofit",
+    category: "Interior",
+    price: "From €340",
+    images: [
+      "/MMI/mmi1.png",
+      "/MMI/f10.png",
+      "/MMI/f30.png",
+    ],
+    description: "Retrofit Apple CarPlay and Android Auto to your BMW with MMI Box or Aftermarket Screen",
+    fullDescription: `Add wireless Apple CarPlay and Android Auto to your BMW with our professional retrofit solutions. We offer two options depending on your vehicle and preferences.
+
+The **MMI Box** connects to your existing iDrive screen, keeping the original OEM appearance while adding CarPlay/Android Auto functionality. Control is via the iDrive controller.
+
+The **Aftermarket Screen** replaces your original display with a larger 10.25" touchscreen. This Linux-based unit runs CarPlay and Android Auto only - it is not a standalone Android tablet. Touch control works exclusively within CarPlay/Android Auto.
+
+All options include professional fitting and full system integration.`,
+    features: [
+      "Wireless Apple CarPlay",
+      "Wireless Android Auto",
+      "Professional installation included",
+      "Retains original iDrive functions",
+      "High-quality audio output",
+      "Steering wheel controls retained",
+      "Reverse camera integration available",
+      "Full system integration",
+    ],
+    specifications: {
+      "MMI Box Compatibility": "F-Series and G-Series BMW",
+      "Screen Size (Aftermarket)": "10.25 inches",
+      "Screen Type": "Linux-based CarPlay/Android Auto",
+      "Connection": "Wireless",
+      "Installation": "Professional fitting included",
+      "Warranty": "12 months",
+    },
+    compatibility: "MMI Box available for F-Series and G-Series BMW models. Aftermarket screens currently available for F10 (CIC & NBT) and F30 (NBT) models. Contact us for other vehicle compatibility.",
+    installation: "All prices include professional fitting. Installation typically takes 2-3 hours. Your vehicle's original iDrive functionality is retained alongside the new CarPlay/Android Auto features.",
+    inStock: true,
+    featured: false,
+    hasOptions: true,
+    options: {
+      dropdown1: {
+        label: "Solution Type",
+        choices: ["MMI Box (Uses Original Screen)", "Aftermarket Screen (10.25\" Touchscreen)"],
+      },
+      dropdown2: {
+        label: "Vehicle / System",
+        choices: ["F-Series BMW", "G-Series BMW", "F10 CIC", "F10 NBT", "F30 NBT"],
+      },
+    },
+    faqs: [
+      {
+        question: "What's the difference between MMI Box and Aftermarket Screen?",
+        answer: "The MMI Box plugs into your existing screen and adds CarPlay/Android Auto while keeping the original OEM look. You control it via the iDrive controller. The Aftermarket Screen replaces your original display with a larger 10.25\" touchscreen - you can touch the screen directly but only for CarPlay/Android Auto functions."
+      },
+      {
+        question: "Is the aftermarket screen an Android tablet?",
+        answer: "No. Our aftermarket screens are Linux-based and run Apple CarPlay and Android Auto only. They are not standalone Android tablets. This keeps the system simple, fast, and reliable."
+      },
+      {
+        question: "Will I lose my original iDrive functions?",
+        answer: "No. With the MMI Box, your original iDrive remains fully functional. With the Aftermarket Screen, you can switch between CarPlay/Android Auto and your original iDrive system."
+      },
+      {
+        question: "Is the connection wireless?",
+        answer: "Yes, both solutions offer wireless Apple CarPlay and Android Auto. Simply connect your phone once and it will automatically connect when you enter the vehicle."
+      },
+      {
+        question: "Which option is right for me?",
+        answer: "Choose the MMI Box if you want to keep the original OEM look and are happy controlling CarPlay via the iDrive controller. Choose the Aftermarket Screen if you want a larger display with direct touchscreen control for CarPlay/Android Auto."
       },
     ],
   },
