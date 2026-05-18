@@ -253,7 +253,7 @@ export const products: Product[] = [
     compatibility: "Compatible with BMW models equipped with NBT EVO iDrive system. Not compatible with CIC or NBT systems.",
     installation: "In-House installation service. Includes high-quality WiFi antenna fitting and full system coding. Service time approximately 30 minutes",
     inStock: true,
-    featured: true,
+    featured: false,
   },
   {
     id: 6,
@@ -377,7 +377,7 @@ export const products: Product[] = [
     compatibility: "Designed specifically for BMW F10 and F11 5 Series models. CIC system offers 2-color ambient lighting, while NBT system provides 9-color options with enhanced control.",
     installation: "Professional installation included. All wiring is professionally routed and hidden for factory appearance. Complete coding integration with iDrive control menu.",
     inStock: true,
-    featured: true,
+    featured: false,
     hasOptions: true,
     options: {
       dropdown1: {
@@ -420,7 +420,7 @@ export const products: Product[] = [
     compatibility: "This service is for older-type petrol port fuel injectors only. Not compatible with direct injection systems (GDI, FSI, TFSI, etc.). Available for all vehicle makes and models.",
     installation: "**Drop off/Collection:** Available for all makes and models - bring your injectors to us.\n\n**BMW Models:** We can remove and refit injectors for you - price on application. Contact us for a quote.",
     inStock: true,
-    featured: true,
+    featured: false,
     hasOptions: true,
     options: {
       dropdown1: {
@@ -518,7 +518,7 @@ export const products: Product[] = [
     compatibility: "Compatible with BMW diesel engines including N47 (4-cylinder), B47 (4-cylinder), N57 (6-cylinder), and B57 (6-cylinder). Contact us to confirm compatibility with your specific model.",
     installation: "Vehicle is required for a full day. Service includes manifold removal, chemical cleaning, new gaskets, and reassembly. Walnut blasting and swirl flap delete are optional add-ons.",
     inStock: true,
-    featured: true,
+    featured: false,
     hasOptions: true,
     options: {
       dropdown1: {
@@ -581,7 +581,7 @@ export const products: Product[] = [
     compatibility: "Compatible with all F/G series BMW models with 8-speed ZF transmissions, Hybrid transmissions, and DCT transmissions (M3/M4/M5 etc)",
     installation: "Your vehicle must be left with us overnight the day prior to your booking date. This allows the transmission to cool down to the required temperature for accurate fluid capacity measurement and optimal service results. Service is completed the following day.",
     inStock: true,
-    featured: true,
+    featured: false,
     hasOptions: true,
     options: {
       dropdown1: {
@@ -705,7 +705,7 @@ The **ACE 3.0 PRO** includes both front and rear cameras as standard, a built-in
     compatibility: "Compatible with all BMW and MINI models. The dashcam connects to the vehicle's power supply for seamless operation and automatic parking mode activation.",
     installation: "Professional installation includes hidden wiring through the headliner and A-pillar, direct power connection to the vehicle's fuse box, and full system setup. All wiring is completely hidden for a factory-fitted appearance.",
     inStock: true,
-    featured: true,
+    featured: false,
     hasOptions: true,
     options: {
       dropdown1: {
