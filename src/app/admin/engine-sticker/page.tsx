@@ -3,20 +3,19 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import html2canvas from "html2canvas";
-import { Download, Printer, Loader2, Check, Wrench, Settings } from "lucide-react";
+import { Download, Printer, Loader2, Check, Wrench, Settings, Cog } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
-type StickerType = "engine" | "service";
+type StickerType = "engine" | "rebuild" | "service";
 
 export default function EngineStickerPage() {
   // Sticker type selector
   const [stickerType, setStickerType] = useState<StickerType>("engine");
 
-  // Engine service sticker state
+  // Engine service sticker state (removed engineRebuild)
   const [rodBearings, setRodBearings] = useState(false);
   const [mainBearings, setMainBearings] = useState(false);
   const [timingChain, setTimingChain] = useState(false);
-  const [engineRebuild, setEngineRebuild] = useState(false);
 
   // Regular service sticker state
   const [oilFilter, setOilFilter] = useState(false);
@@ -47,16 +46,15 @@ export default function EngineStickerPage() {
     try {
       const canvas = await html2canvas(stickerRef.current, {
         backgroundColor: null,
-        scale: 3, // High resolution
+        scale: 3,
         useCORS: true,
         logging: false,
       });
 
-      // Convert to PNG and download
       const link = document.createElement("a");
       const dateStr = date ? new Date(date).toISOString().split("T")[0] : "undated";
-      const prefix = stickerType === "engine" ? "engine-sticker" : "service-sticker";
-      link.download = `${prefix}-${dateStr}.png`;
+      const prefixMap = { engine: "engine-sticker", rebuild: "rebuild-sticker", service: "service-sticker" };
+      link.download = `${prefixMap[stickerType]}-${dateStr}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (error) {
@@ -67,12 +65,12 @@ export default function EngineStickerPage() {
     }
   };
 
-  // Reusable checkbox component for sticker - now using consistent gradient colors
-  const StickerCheckbox = ({ checked, label }: { checked: boolean; label: string }) => {
+  // Checkbox component for stickers
+  const StickerCheckbox = ({ checked, label, large = false }: { checked: boolean; label: string; large?: boolean }) => {
     return (
       <div className="flex items-center gap-2">
         <div
-          className={`w-5 h-5 rounded border-2 ${checked ? 'border-purple-500' : 'border-gray-500'}`}
+          className={`${large ? 'w-6 h-6' : 'w-5 h-5'} rounded border-2 ${checked ? 'border-purple-500' : 'border-gray-600'}`}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -83,42 +81,14 @@ export default function EngineStickerPage() {
         >
           {checked && (
             <Check
-              size={14}
+              size={large ? 16 : 14}
               strokeWidth={3}
               color="white"
               style={{ display: 'block' }}
             />
           )}
         </div>
-        <span className="text-gray-300 text-xs font-medium">{label}</span>
-      </div>
-    );
-  };
-
-  // Larger checkbox for engine sticker landscape layout
-  const EngineStickerCheckbox = ({ checked, label }: { checked: boolean; label: string }) => {
-    return (
-      <div className="flex items-center gap-2">
-        <div
-          className={`w-6 h-6 rounded border-2 ${checked ? 'border-purple-500' : 'border-gray-600'}`}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            background: checked ? 'linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444)' : 'transparent',
-          }}
-        >
-          {checked && (
-            <Check
-              size={16}
-              strokeWidth={3}
-              color="white"
-              style={{ display: 'block' }}
-            />
-          )}
-        </div>
-        <span className="text-gray-200 text-sm font-semibold tracking-wide">{label}</span>
+        <span className={`text-gray-200 ${large ? 'text-sm font-semibold' : 'text-xs font-medium'} tracking-wide`}>{label}</span>
       </div>
     );
   };
@@ -129,8 +99,8 @@ export default function EngineStickerPage() {
         <h1 className="text-3xl font-bold text-white mb-2 text-center">Service Sticker Generator</h1>
         <p className="text-gray-400 text-center mb-8">Generate professional service stickers for the engine bay</p>
 
-        {/* Sticker Type Tabs */}
-        <div className="max-w-md mx-auto mb-6 print:hidden">
+        {/* Sticker Type Tabs - 3 options */}
+        <div className="max-w-2xl mx-auto mb-6 print:hidden">
           <div className="flex rounded-lg bg-zinc-900 p-1 border border-white/10">
             <button
               onClick={() => setStickerType("engine")}
@@ -142,6 +112,17 @@ export default function EngineStickerPage() {
             >
               <Wrench size={16} />
               Engine Service
+            </button>
+            <button
+              onClick={() => setStickerType("rebuild")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md font-medium text-sm transition-all ${
+                stickerType === "rebuild"
+                  ? "bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <Cog size={16} />
+              Engine Rebuild
             </button>
             <button
               onClick={() => setStickerType("service")}
@@ -159,7 +140,7 @@ export default function EngineStickerPage() {
 
         {/* Controls - Hidden when printing */}
         <div className="max-w-md mx-auto mb-8 space-y-4 print:hidden">
-          {/* Date and Mileage - Common to both */}
+          {/* Date and Mileage - Common to all */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Service Date</label>
@@ -207,9 +188,9 @@ export default function EngineStickerPage() {
             </div>
           )}
 
-          {/* Engine Service Checkboxes */}
+          {/* Engine Service Checkboxes - No Engine Rebuild */}
           {stickerType === "engine" && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -236,15 +217,6 @@ export default function EngineStickerPage() {
                   className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Timing Chain</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={engineRebuild}
-                  onChange={(e) => setEngineRebuild(e.target.checked)}
-                  className="w-5 h-5 accent-purple-500"
-                />
-                <span className="text-white">Engine Rebuild</span>
               </label>
             </div>
           )}
@@ -331,52 +303,43 @@ export default function EngineStickerPage() {
 
         {/* Sticker Preview */}
         <div className="flex justify-center">
-          {/* Engine Service Sticker - Landscape Professional Layout */}
+          {/* Engine Service Sticker - Landscape */}
           {stickerType === "engine" && (
             <div
               ref={stickerRef}
               className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black rounded-xl overflow-hidden shadow-2xl"
               style={{
-                width: "480px",
+                width: "520px",
                 border: "3px solid transparent",
                 borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
               }}
             >
-              {/* Top gradient bar */}
               <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
 
-              {/* Main Content - Horizontal Layout */}
-              <div className="p-4">
-                {/* Header Row - Logo and Title */}
-                <div className="flex items-center justify-between mb-4">
+              <div className="p-5">
+                {/* Header - Big Logo */}
+                <div className="flex justify-center mb-3">
                   <Image
                     src="/LogoFinal-01.png"
                     alt="M Coding Ireland"
-                    width={200}
-                    height={60}
-                    className="h-10 w-auto"
+                    width={400}
+                    height={120}
+                    className="w-full max-w-[380px] h-auto"
                   />
-                  <div className="text-right">
-                    <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-wider">
-                      Engine Service
-                    </h2>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Record</p>
-                  </div>
                 </div>
 
                 {/* Divider */}
                 <div className="h-px bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-red-500/50 mb-4" />
 
-                {/* Content Row - Checkboxes and Info Side by Side */}
+                {/* Content Row */}
                 <div className="flex gap-6">
                   {/* Left Side - Checkboxes */}
                   <div className="flex-1">
                     <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Work Completed</div>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                      <EngineStickerCheckbox checked={rodBearings} label="Rod Bearings" />
-                      <EngineStickerCheckbox checked={mainBearings} label="Main Bearings" />
-                      <EngineStickerCheckbox checked={timingChain} label="Timing Chain" />
-                      <EngineStickerCheckbox checked={engineRebuild} label="Engine Rebuild" />
+                    <div className="space-y-2">
+                      <StickerCheckbox checked={rodBearings} label="Rod Bearings" large />
+                      <StickerCheckbox checked={mainBearings} label="Main Bearings" large />
+                      <StickerCheckbox checked={timingChain} label="Timing Chain" large />
                     </div>
                   </div>
 
@@ -384,16 +347,16 @@ export default function EngineStickerPage() {
                   <div className="w-px bg-gradient-to-b from-transparent via-gray-600 to-transparent" />
 
                   {/* Right Side - Date and Mileage */}
-                  <div className="w-36">
+                  <div className="w-44">
                     <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Service Details</div>
                     <div className="space-y-2">
-                      <div className="bg-black/50 rounded-lg p-2.5 border border-white/10">
+                      <div className="bg-black/50 rounded-lg p-3 border border-white/10">
                         <div className="text-[9px] text-gray-500 uppercase tracking-wider">Date</div>
                         <div className="text-white font-bold text-sm">
                           {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__ / ___ / ____'}
                         </div>
                       </div>
-                      <div className="bg-black/50 rounded-lg p-2.5 border border-white/10">
+                      <div className="bg-black/50 rounded-lg p-3 border border-white/10">
                         <div className="text-[9px] text-gray-500 uppercase tracking-wider">Mileage</div>
                         <div className="text-white font-bold text-sm">
                           {mileage ? `${mileage} km` : '________ km'}
@@ -403,134 +366,203 @@ export default function EngineStickerPage() {
                   </div>
                 </div>
 
+                {/* Assembled by text */}
+                <div className="mt-4 pt-3 border-t border-white/10 text-center">
+                  <p className="text-sm text-gray-300 italic">
+                    Assembled with pride by: <span className="text-white font-semibold not-italic">Maciej Cymerys</span>
+                  </p>
+                </div>
+
                 {/* Footer */}
-                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-                  <p className="text-[9px] text-gray-500">
-                    BMW & MINI Specialist
-                  </p>
-                  <p className="text-[9px] text-gray-400 font-medium">
-                    www.m-coding.ie
-                  </p>
-                  <p className="text-[9px] text-gray-500">
-                    Ardfinnan, Co. Tipperary
-                  </p>
+                <div className="mt-2 flex items-center justify-between text-[9px] text-gray-500">
+                  <span>BMW & MINI Specialist</span>
+                  <span className="text-gray-400 font-medium">www.m-coding.ie</span>
+                  <span>Ardfinnan, Co. Tipperary</span>
                 </div>
               </div>
 
-              {/* Bottom gradient bar */}
               <div className="h-2 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
             </div>
           )}
 
-          {/* Regular Service Sticker - Portrait Layout (unchanged) */}
-          {stickerType === "service" && (
+          {/* Complete Engine Rebuild Sticker - Landscape */}
+          {stickerType === "rebuild" && (
             <div
               ref={stickerRef}
-              className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-2 border-transparent rounded-xl overflow-hidden shadow-2xl"
+              className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black rounded-xl overflow-hidden shadow-2xl"
               style={{
-                width: "360px",
+                width: "520px",
+                border: "3px solid transparent",
                 borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
               }}
             >
-              {/* Gradient Border Effect */}
-              <div className="relative">
-                {/* Top gradient bar */}
-                <div className="h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
+              <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
 
-                {/* Content */}
-                <div className="p-4">
-                  {/* Logo - Much bigger, almost filling the width */}
-                  <div className="flex justify-center mb-2">
-                    <Image
-                      src="/LogoFinal-01.png"
-                      alt="M Coding Ireland"
-                      width={320}
-                      height={100}
-                      className="w-full max-w-[280px] h-auto"
-                    />
+              <div className="p-5">
+                {/* Header - Big Logo */}
+                <div className="flex justify-center mb-3">
+                  <Image
+                    src="/LogoFinal-01.png"
+                    alt="M Coding Ireland"
+                    width={400}
+                    height={120}
+                    className="w-full max-w-[380px] h-auto"
+                  />
+                </div>
+
+                {/* Title */}
+                <div className="text-center mb-4">
+                  <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-wider">
+                    Complete Engine Rebuild
+                  </h2>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-red-500/50 mb-4" />
+
+                {/* Date and Mileage - Centered */}
+                <div className="flex justify-center gap-6 mb-4">
+                  <div className="w-44 bg-black/50 rounded-lg p-3 border border-white/10">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wider text-center">Date</div>
+                    <div className="text-white font-bold text-lg text-center">
+                      {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__ / ___ / ____'}
+                    </div>
                   </div>
+                  <div className="w-44 bg-black/50 rounded-lg p-3 border border-white/10">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wider text-center">Mileage</div>
+                    <div className="text-white font-bold text-lg text-center">
+                      {mileage ? `${mileage} km` : '________ km'}
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Title */}
-                  <div className="text-center mb-3">
-                    <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-widest">
+                {/* Assembled by text */}
+                <div className="pt-3 border-t border-white/10 text-center">
+                  <p className="text-sm text-gray-300 italic">
+                    Assembled with pride by: <span className="text-white font-semibold not-italic">Maciej Cymerys</span>
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-2 flex items-center justify-between text-[9px] text-gray-500">
+                  <span>BMW & MINI Specialist</span>
+                  <span className="text-gray-400 font-medium">www.m-coding.ie</span>
+                  <span>Ardfinnan, Co. Tipperary</span>
+                </div>
+              </div>
+
+              <div className="h-2 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
+            </div>
+          )}
+
+          {/* Regular Service Sticker - Landscape */}
+          {stickerType === "service" && (
+            <div
+              ref={stickerRef}
+              className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black rounded-xl overflow-hidden shadow-2xl"
+              style={{
+                width: "520px",
+                border: "3px solid transparent",
+                borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
+              }}
+            >
+              <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
+
+              <div className="p-4">
+                {/* Header Row - Logo and Title */}
+                <div className="flex items-center justify-between mb-3">
+                  <Image
+                    src="/LogoFinal-01.png"
+                    alt="M Coding Ireland"
+                    width={220}
+                    height={70}
+                    className="h-12 w-auto"
+                  />
+                  <div className="text-right">
+                    <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-wider">
                       Service Record
                     </h2>
                   </div>
+                </div>
 
-                  {/* Regular Service Checkboxes */}
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
-                    <StickerCheckbox checked={oilFilter} label="Oil Filter" />
-                    <StickerCheckbox checked={airFilter} label="Air Filter" />
-                    <StickerCheckbox checked={fuelFilter} label="Fuel Filter" />
-                    <StickerCheckbox checked={cabinFilter} label="Cabin Filter" />
-                    <StickerCheckbox checked={sparkPlugs} label="Spark Plugs" />
-                  </div>
+                {/* Divider */}
+                <div className="h-px bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-red-500/50 mb-3" />
 
-                  {/* Divider */}
-                  <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent mb-4" />
-
-                  {/* Date and Mileage */}
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="bg-black/40 rounded-lg p-2.5 border border-white/10">
-                      <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-0.5">Date</div>
-                      <div className="text-white font-bold text-xs">
-                        {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '___/___/______'}
-                      </div>
-                    </div>
-                    <div className="bg-black/40 rounded-lg p-2.5 border border-white/10">
-                      <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-0.5">Mileage</div>
-                      <div className="text-white font-bold text-xs">
-                        {mileage ? `${mileage} km` : '__________ km'}
-                      </div>
+                {/* Content Row */}
+                <div className="flex gap-4">
+                  {/* Left Side - Checkboxes */}
+                  <div className="flex-1">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Work Completed</div>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                      <StickerCheckbox checked={oilFilter} label="Oil Filter" />
+                      <StickerCheckbox checked={airFilter} label="Air Filter" />
+                      <StickerCheckbox checked={fuelFilter} label="Fuel Filter" />
+                      <StickerCheckbox checked={cabinFilter} label="Cabin Filter" />
+                      <StickerCheckbox checked={sparkPlugs} label="Spark Plugs" />
                     </div>
                   </div>
 
-                  {/* Next Service */}
-                  <div className="text-[9px] text-gray-500 uppercase tracking-wider text-center mb-2">Next Service Due</div>
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-2.5 border border-blue-500/20">
-                      <div className="text-[9px] text-blue-400 uppercase tracking-wider mb-0.5">Date</div>
-                      <div className="text-white font-bold text-xs">
-                        {nextServiceDate ? new Date(nextServiceDate).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '___/___/______'}
+                  {/* Vertical Divider */}
+                  <div className="w-px bg-gradient-to-b from-transparent via-gray-600 to-transparent" />
+
+                  {/* Right Side - Dates */}
+                  <div className="w-48">
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <div className="bg-black/50 rounded p-2 border border-white/10">
+                        <div className="text-[8px] text-gray-500 uppercase">Date</div>
+                        <div className="text-white font-bold text-[11px]">
+                          {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__/__/____'}
+                        </div>
+                      </div>
+                      <div className="bg-black/50 rounded p-2 border border-white/10">
+                        <div className="text-[8px] text-gray-500 uppercase">Mileage</div>
+                        <div className="text-white font-bold text-[11px]">
+                          {mileage ? `${mileage} km` : '______ km'}
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-2.5 border border-blue-500/20">
-                      <div className="text-[9px] text-blue-400 uppercase tracking-wider mb-0.5">Or At</div>
-                      <div className="text-white font-bold text-xs">
-                        {nextServiceMileage ? `${nextServiceMileage} km` : '__________ km'}
+                    <div className="text-[8px] text-gray-500 uppercase text-center mb-1">Next Service</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-blue-900/30 rounded p-2 border border-blue-500/20">
+                        <div className="text-[8px] text-blue-400 uppercase">Date</div>
+                        <div className="text-white font-bold text-[11px]">
+                          {nextServiceDate ? new Date(nextServiceDate).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__/__/____'}
+                        </div>
+                      </div>
+                      <div className="bg-blue-900/30 rounded p-2 border border-blue-500/20">
+                        <div className="text-[8px] text-blue-400 uppercase">Or At</div>
+                        <div className="text-white font-bold text-[11px]">
+                          {nextServiceMileage ? `${nextServiceMileage} km` : '______ km'}
+                        </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* QR Code */}
-                  <div className="flex items-center justify-center gap-3 mb-3">
-                    <div className="bg-white p-1.5 rounded-lg">
+                {/* QR Code and Footer */}
+                <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-white p-1 rounded">
                       <QRCodeSVG
                         value="https://m-coding.ie/services#pricing"
-                        size={50}
+                        size={36}
                         level="M"
                         bgColor="white"
                         fgColor="black"
                       />
                     </div>
-                    <div className="text-[9px] text-gray-400 leading-tight">
-                      <div className="font-semibold text-white mb-0.5">Book Your Next Service</div>
-                      <div>Scan to visit</div>
-                      <div className="text-blue-400">m-coding.ie</div>
+                    <div className="text-[8px] text-gray-400 leading-tight">
+                      <div className="font-semibold text-white">Book Next Service</div>
+                      <div>Scan QR code</div>
                     </div>
                   </div>
-
-                  {/* Footer */}
-                  <div className="pt-2 border-t border-white/10 text-center">
-                    <p className="text-[9px] text-gray-500">
-                      www.m-coding.ie • Ardfinnan, Co. Tipperary
-                    </p>
-                  </div>
+                  <p className="text-[9px] text-gray-500">
+                    www.m-coding.ie • Ardfinnan, Co. Tipperary
+                  </p>
                 </div>
-
-                {/* Bottom gradient bar */}
-                <div className="h-1.5 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
               </div>
+
+              <div className="h-2 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
             </div>
           )}
         </div>
@@ -542,8 +574,7 @@ export default function EngineStickerPage() {
             <li>• <strong className="text-white">Download PNG:</strong> Saves a high-resolution image file</li>
             <li>• <strong className="text-white">Print:</strong> Opens print dialog for direct printing</li>
             <li>• Use waterproof/vinyl sticker paper for durability</li>
-            <li>• <strong className="text-white">Engine Sticker:</strong> Recommended size 120mm x 70mm (landscape)</li>
-            <li>• <strong className="text-white">Service Sticker:</strong> Recommended size 80mm x 100mm (portrait)</li>
+            <li>• Recommended size: 130mm x 75mm (landscape)</li>
             <li>• Apply to a clean, dry surface in the engine bay</li>
           </ul>
         </div>
