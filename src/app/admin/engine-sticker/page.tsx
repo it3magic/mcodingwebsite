@@ -95,6 +95,34 @@ export default function EngineStickerPage() {
     );
   };
 
+  // Larger checkbox for engine sticker landscape layout
+  const EngineStickerCheckbox = ({ checked, label }: { checked: boolean; label: string }) => {
+    return (
+      <div className="flex items-center gap-2">
+        <div
+          className={`w-6 h-6 rounded border-2 ${checked ? 'border-purple-500' : 'border-gray-600'}`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            background: checked ? 'linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444)' : 'transparent',
+          }}
+        >
+          {checked && (
+            <Check
+              size={16}
+              strokeWidth={3}
+              color="white"
+              style={{ display: 'block' }}
+            />
+          )}
+        </div>
+        <span className="text-gray-200 text-sm font-semibold tracking-wide">{label}</span>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 pt-24 pb-12">
       <div className="container mx-auto px-4">
@@ -303,51 +331,133 @@ export default function EngineStickerPage() {
 
         {/* Sticker Preview */}
         <div className="flex justify-center">
-          <div
-            ref={stickerRef}
-            className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-2 border-transparent rounded-xl overflow-hidden shadow-2xl"
-            style={{
-              width: stickerType === "service" ? "360px" : "320px",
-              borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
-            }}
-          >
-            {/* Gradient Border Effect */}
-            <div className="relative">
+          {/* Engine Service Sticker - Landscape Professional Layout */}
+          {stickerType === "engine" && (
+            <div
+              ref={stickerRef}
+              className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black rounded-xl overflow-hidden shadow-2xl"
+              style={{
+                width: "480px",
+                border: "3px solid transparent",
+                borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
+              }}
+            >
               {/* Top gradient bar */}
-              <div className="h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
+              <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
 
-              {/* Content */}
+              {/* Main Content - Horizontal Layout */}
               <div className="p-4">
-                {/* Logo - Much bigger, almost filling the width */}
-                <div className="flex justify-center mb-2">
+                {/* Header Row - Logo and Title */}
+                <div className="flex items-center justify-between mb-4">
                   <Image
                     src="/LogoFinal-01.png"
                     alt="M Coding Ireland"
-                    width={320}
-                    height={100}
-                    className="w-full max-w-[280px] h-auto"
+                    width={200}
+                    height={60}
+                    className="h-10 w-auto"
                   />
-                </div>
-
-                {/* Title */}
-                <div className="text-center mb-3">
-                  <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-widest">
-                    {stickerType === "engine" ? "Engine Service Record" : "Service Record"}
-                  </h2>
-                </div>
-
-                {/* Engine Service Checkboxes */}
-                {stickerType === "engine" && (
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
-                    <StickerCheckbox checked={rodBearings} label="Rod Bearings" />
-                    <StickerCheckbox checked={mainBearings} label="Main Bearings" />
-                    <StickerCheckbox checked={timingChain} label="Timing Chain" />
-                    <StickerCheckbox checked={engineRebuild} label="Engine Rebuild" />
+                  <div className="text-right">
+                    <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-wider">
+                      Engine Service
+                    </h2>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">Record</p>
                   </div>
-                )}
+                </div>
 
-                {/* Regular Service Checkboxes */}
-                {stickerType === "service" && (
+                {/* Divider */}
+                <div className="h-px bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-red-500/50 mb-4" />
+
+                {/* Content Row - Checkboxes and Info Side by Side */}
+                <div className="flex gap-6">
+                  {/* Left Side - Checkboxes */}
+                  <div className="flex-1">
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Work Completed</div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                      <EngineStickerCheckbox checked={rodBearings} label="Rod Bearings" />
+                      <EngineStickerCheckbox checked={mainBearings} label="Main Bearings" />
+                      <EngineStickerCheckbox checked={timingChain} label="Timing Chain" />
+                      <EngineStickerCheckbox checked={engineRebuild} label="Engine Rebuild" />
+                    </div>
+                  </div>
+
+                  {/* Vertical Divider */}
+                  <div className="w-px bg-gradient-to-b from-transparent via-gray-600 to-transparent" />
+
+                  {/* Right Side - Date and Mileage */}
+                  <div className="w-36">
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Service Details</div>
+                    <div className="space-y-2">
+                      <div className="bg-black/50 rounded-lg p-2.5 border border-white/10">
+                        <div className="text-[9px] text-gray-500 uppercase tracking-wider">Date</div>
+                        <div className="text-white font-bold text-sm">
+                          {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__ / ___ / ____'}
+                        </div>
+                      </div>
+                      <div className="bg-black/50 rounded-lg p-2.5 border border-white/10">
+                        <div className="text-[9px] text-gray-500 uppercase tracking-wider">Mileage</div>
+                        <div className="text-white font-bold text-sm">
+                          {mileage ? `${mileage} km` : '________ km'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+                  <p className="text-[9px] text-gray-500">
+                    BMW & MINI Specialist
+                  </p>
+                  <p className="text-[9px] text-gray-400 font-medium">
+                    www.m-coding.ie
+                  </p>
+                  <p className="text-[9px] text-gray-500">
+                    Ardfinnan, Co. Tipperary
+                  </p>
+                </div>
+              </div>
+
+              {/* Bottom gradient bar */}
+              <div className="h-2 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
+            </div>
+          )}
+
+          {/* Regular Service Sticker - Portrait Layout (unchanged) */}
+          {stickerType === "service" && (
+            <div
+              ref={stickerRef}
+              className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border-2 border-transparent rounded-xl overflow-hidden shadow-2xl"
+              style={{
+                width: "360px",
+                borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
+              }}
+            >
+              {/* Gradient Border Effect */}
+              <div className="relative">
+                {/* Top gradient bar */}
+                <div className="h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
+
+                {/* Content */}
+                <div className="p-4">
+                  {/* Logo - Much bigger, almost filling the width */}
+                  <div className="flex justify-center mb-2">
+                    <Image
+                      src="/LogoFinal-01.png"
+                      alt="M Coding Ireland"
+                      width={320}
+                      height={100}
+                      className="w-full max-w-[280px] h-auto"
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <div className="text-center mb-3">
+                    <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-widest">
+                      Service Record
+                    </h2>
+                  </div>
+
+                  {/* Regular Service Checkboxes */}
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
                     <StickerCheckbox checked={oilFilter} label="Oil Filter" />
                     <StickerCheckbox checked={airFilter} label="Air Filter" />
@@ -355,78 +465,74 @@ export default function EngineStickerPage() {
                     <StickerCheckbox checked={cabinFilter} label="Cabin Filter" />
                     <StickerCheckbox checked={sparkPlugs} label="Spark Plugs" />
                   </div>
-                )}
 
-                {/* Divider */}
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent mb-4" />
+                  {/* Divider */}
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent mb-4" />
 
-                {/* Date and Mileage */}
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="bg-black/40 rounded-lg p-2.5 border border-white/10">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-0.5">Date</div>
-                    <div className="text-white font-bold text-xs">
-                      {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '___/___/______'}
+                  {/* Date and Mileage */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="bg-black/40 rounded-lg p-2.5 border border-white/10">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-0.5">Date</div>
+                      <div className="text-white font-bold text-xs">
+                        {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '___/___/______'}
+                      </div>
+                    </div>
+                    <div className="bg-black/40 rounded-lg p-2.5 border border-white/10">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-0.5">Mileage</div>
+                      <div className="text-white font-bold text-xs">
+                        {mileage ? `${mileage} km` : '__________ km'}
+                      </div>
                     </div>
                   </div>
-                  <div className="bg-black/40 rounded-lg p-2.5 border border-white/10">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-0.5">Mileage</div>
-                    <div className="text-white font-bold text-xs">
-                      {mileage ? `${mileage} km` : '__________ km'}
+
+                  {/* Next Service */}
+                  <div className="text-[9px] text-gray-500 uppercase tracking-wider text-center mb-2">Next Service Due</div>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-2.5 border border-blue-500/20">
+                      <div className="text-[9px] text-blue-400 uppercase tracking-wider mb-0.5">Date</div>
+                      <div className="text-white font-bold text-xs">
+                        {nextServiceDate ? new Date(nextServiceDate).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '___/___/______'}
+                      </div>
                     </div>
+                    <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-2.5 border border-blue-500/20">
+                      <div className="text-[9px] text-blue-400 uppercase tracking-wider mb-0.5">Or At</div>
+                      <div className="text-white font-bold text-xs">
+                        {nextServiceMileage ? `${nextServiceMileage} km` : '__________ km'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* QR Code */}
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <div className="bg-white p-1.5 rounded-lg">
+                      <QRCodeSVG
+                        value="https://m-coding.ie/services#pricing"
+                        size={50}
+                        level="M"
+                        bgColor="white"
+                        fgColor="black"
+                      />
+                    </div>
+                    <div className="text-[9px] text-gray-400 leading-tight">
+                      <div className="font-semibold text-white mb-0.5">Book Your Next Service</div>
+                      <div>Scan to visit</div>
+                      <div className="text-blue-400">m-coding.ie</div>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="pt-2 border-t border-white/10 text-center">
+                    <p className="text-[9px] text-gray-500">
+                      www.m-coding.ie • Ardfinnan, Co. Tipperary
+                    </p>
                   </div>
                 </div>
 
-                {/* Next Service - Only for Regular Service */}
-                {stickerType === "service" && (
-                  <>
-                    <div className="text-[9px] text-gray-500 uppercase tracking-wider text-center mb-2">Next Service Due</div>
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                      <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-2.5 border border-blue-500/20">
-                        <div className="text-[9px] text-blue-400 uppercase tracking-wider mb-0.5">Date</div>
-                        <div className="text-white font-bold text-xs">
-                          {nextServiceDate ? new Date(nextServiceDate).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '___/___/______'}
-                        </div>
-                      </div>
-                      <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-2.5 border border-blue-500/20">
-                        <div className="text-[9px] text-blue-400 uppercase tracking-wider mb-0.5">Or At</div>
-                        <div className="text-white font-bold text-xs">
-                          {nextServiceMileage ? `${nextServiceMileage} km` : '__________ km'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* QR Code */}
-                    <div className="flex items-center justify-center gap-3 mb-3">
-                      <div className="bg-white p-1.5 rounded-lg">
-                        <QRCodeSVG
-                          value="https://m-coding.ie/services#pricing"
-                          size={50}
-                          level="M"
-                          bgColor="white"
-                          fgColor="black"
-                        />
-                      </div>
-                      <div className="text-[9px] text-gray-400 leading-tight">
-                        <div className="font-semibold text-white mb-0.5">Book Your Next Service</div>
-                        <div>Scan to visit</div>
-                        <div className="text-blue-400">m-coding.ie</div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Footer */}
-                <div className="pt-2 border-t border-white/10 text-center">
-                  <p className="text-[9px] text-gray-500">
-                    www.m-coding.ie • Ardfinnan, Co. Tipperary
-                  </p>
-                </div>
+                {/* Bottom gradient bar */}
+                <div className="h-1.5 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
               </div>
-
-              {/* Bottom gradient bar */}
-              <div className="h-1.5 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
             </div>
-          </div>
+          )}
         </div>
 
         {/* Print Instructions */}
@@ -436,9 +542,9 @@ export default function EngineStickerPage() {
             <li>• <strong className="text-white">Download PNG:</strong> Saves a high-resolution image file</li>
             <li>• <strong className="text-white">Print:</strong> Opens print dialog for direct printing</li>
             <li>• Use waterproof/vinyl sticker paper for durability</li>
-            <li>• Recommended size: 80mm x 100mm</li>
+            <li>• <strong className="text-white">Engine Sticker:</strong> Recommended size 120mm x 70mm (landscape)</li>
+            <li>• <strong className="text-white">Service Sticker:</strong> Recommended size 80mm x 100mm (portrait)</li>
             <li>• Apply to a clean, dry surface in the engine bay</li>
-            <li>• Avoid areas with extreme heat</li>
           </ul>
         </div>
       </div>
