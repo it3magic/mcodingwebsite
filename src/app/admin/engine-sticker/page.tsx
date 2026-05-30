@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import html2canvas from "html2canvas";
-import { Download, Printer, Loader2 } from "lucide-react";
+import { Download, Printer, Loader2, Check } from "lucide-react";
 
 export default function EngineStickerPage() {
   const [rodBearings, setRodBearings] = useState(false);
@@ -43,6 +43,40 @@ export default function EngineStickerPage() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  // Reusable checkbox component for sticker
+  const StickerCheckbox = ({ checked, color, label }: { checked: boolean; color: string; label: string }) => {
+    const colorClasses: Record<string, string> = {
+      blue: checked ? 'bg-blue-500 border-blue-500' : 'border-gray-500',
+      purple: checked ? 'bg-purple-500 border-purple-500' : 'border-gray-500',
+      red: checked ? 'bg-red-500 border-red-500' : 'border-gray-500',
+      gradient: checked ? 'bg-purple-500 border-purple-500' : 'border-gray-500',
+    };
+
+    return (
+      <div className="flex items-center gap-2">
+        <div
+          className={`w-5 h-5 rounded border-2 ${colorClasses[color]}`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          {checked && (
+            <Check
+              size={14}
+              strokeWidth={3}
+              color="white"
+              style={{ display: 'block' }}
+            />
+          )}
+        </div>
+        <span className="text-gray-300 text-xs font-medium">{label}</span>
+      </div>
+    );
   };
 
   return (
@@ -160,14 +194,14 @@ export default function EngineStickerPage() {
 
               {/* Content */}
               <div className="p-5">
-                {/* Logo */}
-                <div className="flex justify-center mb-4">
+                {/* Logo - Made bigger */}
+                <div className="flex justify-center mb-3">
                   <Image
                     src="/LogoFinal-01.png"
                     alt="M Coding Ireland"
-                    width={180}
-                    height={60}
-                    className="h-12 w-auto"
+                    width={260}
+                    height={80}
+                    className="h-16 w-auto"
                   />
                 </div>
 
@@ -178,32 +212,12 @@ export default function EngineStickerPage() {
                   </h2>
                 </div>
 
-                {/* Checkboxes Grid */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${rodBearings ? 'bg-blue-500 border-blue-500' : 'border-gray-500'}`}>
-                      {rodBearings && <span className="text-white text-xs">✓</span>}
-                    </div>
-                    <span className="text-gray-300 text-xs font-medium">Rod Bearings</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${mainBearings ? 'bg-purple-500 border-purple-500' : 'border-gray-500'}`}>
-                      {mainBearings && <span className="text-white text-xs">✓</span>}
-                    </div>
-                    <span className="text-gray-300 text-xs font-medium">Main Bearings</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${timingChain ? 'bg-red-500 border-red-500' : 'border-gray-500'}`}>
-                      {timingChain && <span className="text-white text-xs">✓</span>}
-                    </div>
-                    <span className="text-gray-300 text-xs font-medium">Timing Chain</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${engineRebuild ? 'bg-gradient-to-r from-blue-500 to-purple-500 border-purple-500' : 'border-gray-500'}`}>
-                      {engineRebuild && <span className="text-white text-xs">✓</span>}
-                    </div>
-                    <span className="text-gray-300 text-xs font-medium">Engine Rebuild</span>
-                  </div>
+                {/* Checkboxes Grid - Using SVG Check icons for proper rendering */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
+                  <StickerCheckbox checked={rodBearings} color="blue" label="Rod Bearings" />
+                  <StickerCheckbox checked={mainBearings} color="purple" label="Main Bearings" />
+                  <StickerCheckbox checked={timingChain} color="red" label="Timing Chain" />
+                  <StickerCheckbox checked={engineRebuild} color="gradient" label="Engine Rebuild" />
                 </div>
 
                 {/* Divider */}
