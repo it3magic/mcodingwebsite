@@ -67,26 +67,18 @@ export default function EngineStickerPage() {
     }
   };
 
-  // Reusable checkbox component for sticker
-  const StickerCheckbox = ({ checked, color, label }: { checked: boolean; color: string; label: string }) => {
-    const colorClasses: Record<string, string> = {
-      blue: checked ? 'bg-blue-500 border-blue-500' : 'border-gray-500',
-      purple: checked ? 'bg-purple-500 border-purple-500' : 'border-gray-500',
-      red: checked ? 'bg-red-500 border-red-500' : 'border-gray-500',
-      green: checked ? 'bg-green-500 border-green-500' : 'border-gray-500',
-      orange: checked ? 'bg-orange-500 border-orange-500' : 'border-gray-500',
-      gradient: checked ? 'bg-purple-500 border-purple-500' : 'border-gray-500',
-    };
-
+  // Reusable checkbox component for sticker - now using consistent gradient colors
+  const StickerCheckbox = ({ checked, label }: { checked: boolean; label: string }) => {
     return (
       <div className="flex items-center gap-2">
         <div
-          className={`w-5 h-5 rounded border-2 ${colorClasses[color]}`}
+          className={`w-5 h-5 rounded border-2 ${checked ? 'border-purple-500' : 'border-gray-500'}`}
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
+            background: checked ? 'linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444)' : 'transparent',
           }}
         >
           {checked && (
@@ -195,7 +187,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={rodBearings}
                   onChange={(e) => setRodBearings(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Rod Bearings</span>
               </label>
@@ -204,7 +196,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={mainBearings}
                   onChange={(e) => setMainBearings(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Main Bearings</span>
               </label>
@@ -213,7 +205,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={timingChain}
                   onChange={(e) => setTimingChain(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Timing Chain</span>
               </label>
@@ -222,7 +214,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={engineRebuild}
                   onChange={(e) => setEngineRebuild(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Engine Rebuild</span>
               </label>
@@ -237,7 +229,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={oilFilter}
                   onChange={(e) => setOilFilter(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Oil Filter</span>
               </label>
@@ -246,7 +238,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={airFilter}
                   onChange={(e) => setAirFilter(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Air Filter</span>
               </label>
@@ -255,7 +247,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={fuelFilter}
                   onChange={(e) => setFuelFilter(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Fuel Filter</span>
               </label>
@@ -264,7 +256,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={cabinFilter}
                   onChange={(e) => setCabinFilter(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Cabin Filter</span>
               </label>
@@ -273,7 +265,7 @@ export default function EngineStickerPage() {
                   type="checkbox"
                   checked={sparkPlugs}
                   onChange={(e) => setSparkPlugs(e.target.checked)}
-                  className="w-5 h-5 accent-blue-500"
+                  className="w-5 h-5 accent-purple-500"
                 />
                 <span className="text-white">Spark Plugs</span>
               </label>
@@ -325,20 +317,20 @@ export default function EngineStickerPage() {
               <div className="h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
 
               {/* Content */}
-              <div className="p-5">
-                {/* Logo - Made bigger */}
-                <div className="flex justify-center mb-3">
+              <div className="p-4">
+                {/* Logo - Much bigger, almost filling the width */}
+                <div className="flex justify-center mb-2">
                   <Image
                     src="/LogoFinal-01.png"
                     alt="M Coding Ireland"
-                    width={260}
-                    height={80}
-                    className="h-16 w-auto"
+                    width={320}
+                    height={100}
+                    className="w-full max-w-[280px] h-auto"
                   />
                 </div>
 
                 {/* Title */}
-                <div className="text-center mb-4">
+                <div className="text-center mb-3">
                   <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-widest">
                     {stickerType === "engine" ? "Engine Service Record" : "Service Record"}
                   </h2>
@@ -347,21 +339,21 @@ export default function EngineStickerPage() {
                 {/* Engine Service Checkboxes */}
                 {stickerType === "engine" && (
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
-                    <StickerCheckbox checked={rodBearings} color="blue" label="Rod Bearings" />
-                    <StickerCheckbox checked={mainBearings} color="purple" label="Main Bearings" />
-                    <StickerCheckbox checked={timingChain} color="red" label="Timing Chain" />
-                    <StickerCheckbox checked={engineRebuild} color="gradient" label="Engine Rebuild" />
+                    <StickerCheckbox checked={rodBearings} label="Rod Bearings" />
+                    <StickerCheckbox checked={mainBearings} label="Main Bearings" />
+                    <StickerCheckbox checked={timingChain} label="Timing Chain" />
+                    <StickerCheckbox checked={engineRebuild} label="Engine Rebuild" />
                   </div>
                 )}
 
                 {/* Regular Service Checkboxes */}
                 {stickerType === "service" && (
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
-                    <StickerCheckbox checked={oilFilter} color="blue" label="Oil Filter" />
-                    <StickerCheckbox checked={airFilter} color="green" label="Air Filter" />
-                    <StickerCheckbox checked={fuelFilter} color="orange" label="Fuel Filter" />
-                    <StickerCheckbox checked={cabinFilter} color="purple" label="Cabin Filter" />
-                    <StickerCheckbox checked={sparkPlugs} color="red" label="Spark Plugs" />
+                    <StickerCheckbox checked={oilFilter} label="Oil Filter" />
+                    <StickerCheckbox checked={airFilter} label="Air Filter" />
+                    <StickerCheckbox checked={fuelFilter} label="Fuel Filter" />
+                    <StickerCheckbox checked={cabinFilter} label="Cabin Filter" />
+                    <StickerCheckbox checked={sparkPlugs} label="Spark Plugs" />
                   </div>
                 )}
 
