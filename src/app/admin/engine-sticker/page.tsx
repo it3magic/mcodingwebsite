@@ -2,6 +2,8 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import html2canvas from "html2canvas";
+import { Download, Printer, Loader2 } from "lucide-react";
 
 export default function EngineStickerPage() {
   const [rodBearings, setRodBearings] = useState(false);
@@ -10,17 +12,44 @@ export default function EngineStickerPage() {
   const [engineRebuild, setEngineRebuild] = useState(false);
   const [date, setDate] = useState("");
   const [mileage, setMileage] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
   const stickerRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
     window.print();
   };
 
+  const handleDownloadPNG = async () => {
+    if (!stickerRef.current) return;
+
+    setIsGenerating(true);
+    try {
+      const canvas = await html2canvas(stickerRef.current, {
+        backgroundColor: null,
+        scale: 3, // High resolution
+        useCORS: true,
+        logging: false,
+      });
+
+      // Convert to PNG and download
+      const link = document.createElement("a");
+      const dateStr = date ? new Date(date).toISOString().split("T")[0] : "undated";
+      link.download = `engine-sticker-${dateStr}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (error) {
+      console.error("Error generating PNG:", error);
+      alert("Failed to generate PNG. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 pt-24 pb-12">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold text-white mb-2 text-center">Engine Service Sticker Generator</h1>
-        <p className="text-gray-400 text-center mb-8">Fill in the details below and print the sticker for the engine bay</p>
+        <p className="text-gray-400 text-center mb-8">Fill in the details below and print or download the sticker for the engine bay</p>
 
         {/* Controls - Hidden when printing */}
         <div className="max-w-md mx-auto mb-8 space-y-4 print:hidden">
@@ -85,12 +114,33 @@ export default function EngineStickerPage() {
             </label>
           </div>
 
-          <button
-            onClick={handlePrint}
-            className="w-full py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white font-bold rounded-lg hover:opacity-90 transition-all"
-          >
-            Print Sticker
-          </button>
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={handleDownloadPNG}
+              disabled={isGenerating}
+              className="flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download size={20} />
+                  Download PNG
+                </>
+              )}
+            </button>
+            <button
+              onClick={handlePrint}
+              className="flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white font-bold rounded-lg hover:opacity-90 transition-all"
+            >
+              <Printer size={20} />
+              Print Sticker
+            </button>
+          </div>
         </div>
 
         {/* Sticker Preview */}
@@ -191,8 +241,10 @@ export default function EngineStickerPage() {
 
         {/* Print Instructions */}
         <div className="max-w-md mx-auto mt-8 p-4 bg-zinc-900/50 border border-white/10 rounded-xl print:hidden">
-          <h3 className="text-white font-semibold mb-2">Print Instructions:</h3>
+          <h3 className="text-white font-semibold mb-2">Instructions:</h3>
           <ul className="text-gray-400 text-sm space-y-1">
+            <li>• <strong className="text-white">Download PNG:</strong> Saves a high-resolution image file</li>
+            <li>• <strong className="text-white">Print:</strong> Opens print dialog for direct printing</li>
             <li>• Use waterproof/vinyl sticker paper for durability</li>
             <li>• Recommended size: 80mm x 100mm</li>
             <li>• Apply to a clean, dry surface in the engine bay</li>
