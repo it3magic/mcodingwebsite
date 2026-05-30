@@ -208,6 +208,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  // Track scroll position to show/hide sticky price bar
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show sticky bar after scrolling 400px (past the price section)
+      setShowStickyBar(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   const [selectedOption1, setSelectedOption1] = useState("");
   const [selectedOption2, setSelectedOption2] = useState("");
   const [selectedOption3, setSelectedOption3] = useState("");
@@ -1399,6 +1410,49 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           </div>
         </section>
       )}
+
+      {/* Sticky Price Bar - Shows when scrolling */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ${
+          showStickyBar ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="bg-zinc-900/95 backdrop-blur-lg border-t border-white/10 shadow-2xl">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between gap-4">
+              {/* Product Info */}
+              <div className="flex items-center gap-4 min-w-0">
+                <img
+                  src={displayImages[currentImageIndex]}
+                  alt={product.name}
+                  className="w-12 h-12 rounded-lg object-cover hidden sm:block"
+                />
+                <div className="min-w-0">
+                  <h4 className="text-white font-semibold text-sm truncate">{product.name}</h4>
+                  {product.hasOptions && (selectedOption1 || selectedOption2) && (
+                    <p className="text-gray-400 text-xs truncate">
+                      {[selectedOption1, selectedOption2].filter(Boolean).join(' • ')}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Price and CTA */}
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gradient">{displayPrice}</div>
+                </div>
+                <button
+                  onClick={handleEnquire}
+                  className="px-6 py-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white font-semibold rounded-lg hover:opacity-90 transition-all whitespace-nowrap"
+                >
+                  Enquire Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { FileSpreadsheet, Mail, Zap, Download, ExternalLink, Bell, LogOut, MessageCircle, CreditCard } from "lucide-react";
+import { FileSpreadsheet, Mail, Zap, Download, ExternalLink, Bell, LogOut, MessageCircle, CreditCard, Wrench } from "lucide-react";
 import { isAuthenticated } from "@/lib/auth";
 import LogoutButton from "@/components/admin/logout-button";
 
@@ -141,6 +141,24 @@ export default async function AdminDashboardPage() {
               </h3>
               <p className="text-sm text-gray-400">
                 Print-ready card designs with QR codes
+              </p>
+            </Link>
+
+            {/* Engine Service Sticker */}
+            <Link
+              href="/admin/engine-sticker"
+              className="group bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 border border-white/10 rounded-xl p-6 hover:border-white/30 transition-all"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-red-500/20 rounded-lg">
+                  <Wrench className="text-purple-400" size={24} />
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">
+                Engine Sticker
+              </h3>
+              <p className="text-sm text-gray-400">
+                Generate service stickers for engine bay
               </p>
             </Link>
           </div>
