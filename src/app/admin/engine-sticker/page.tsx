@@ -12,7 +12,7 @@ export default function EngineStickerPage() {
   // Sticker type selector
   const [stickerType, setStickerType] = useState<StickerType>("engine");
 
-  // Engine service sticker state (removed engineRebuild)
+  // Engine service sticker state
   const [rodBearings, setRodBearings] = useState(false);
   const [mainBearings, setMainBearings] = useState(false);
   const [timingChain, setTimingChain] = useState(false);
@@ -23,6 +23,7 @@ export default function EngineStickerPage() {
   const [fuelFilter, setFuelFilter] = useState(false);
   const [cabinFilter, setCabinFilter] = useState(false);
   const [sparkPlugs, setSparkPlugs] = useState(false);
+  const [liquiMolyOil, setLiquiMolyOil] = useState(false);
 
   // Common fields
   const [date, setDate] = useState("");
@@ -188,7 +189,7 @@ export default function EngineStickerPage() {
             </div>
           )}
 
-          {/* Engine Service Checkboxes - No Engine Rebuild */}
+          {/* Engine Service Checkboxes */}
           {stickerType === "engine" && (
             <div className="grid grid-cols-3 gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -227,6 +228,15 @@ export default function EngineStickerPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
+                  checked={liquiMolyOil}
+                  onChange={(e) => setLiquiMolyOil(e.target.checked)}
+                  className="w-5 h-5 accent-purple-500"
+                />
+                <span className="text-white">Liqui Moly Oil</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
                   checked={oilFilter}
                   onChange={(e) => setOilFilter(e.target.checked)}
                   className="w-5 h-5 accent-purple-500"
@@ -260,7 +270,7 @@ export default function EngineStickerPage() {
                 />
                 <span className="text-white">Cabin Filter</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer col-span-2">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={sparkPlugs}
@@ -318,7 +328,7 @@ export default function EngineStickerPage() {
 
               <div className="p-5">
                 {/* Header - Big Logo */}
-                <div className="flex justify-center mb-3">
+                <div className="flex justify-center mb-2">
                   <Image
                     src="/LogoFinal-01.png"
                     alt="M Coding Ireland"
@@ -326,6 +336,13 @@ export default function EngineStickerPage() {
                     height={120}
                     className="w-full max-w-[380px] h-auto"
                   />
+                </div>
+
+                {/* Assembled by text - Right under logo, bigger */}
+                <div className="text-center mb-4">
+                  <p className="text-base text-gray-200">
+                    Assembled with pride by: <span className="text-white font-bold">Maciej Cymerys</span>
+                  </p>
                 </div>
 
                 {/* Divider */}
@@ -366,15 +383,8 @@ export default function EngineStickerPage() {
                   </div>
                 </div>
 
-                {/* Assembled by text */}
-                <div className="mt-4 pt-3 border-t border-white/10 text-center">
-                  <p className="text-sm text-gray-300 italic">
-                    Assembled with pride by: <span className="text-white font-semibold not-italic">Maciej Cymerys</span>
-                  </p>
-                </div>
-
                 {/* Footer */}
-                <div className="mt-2 flex items-center justify-between text-[9px] text-gray-500">
+                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[9px] text-gray-500">
                   <span>BMW & MINI Specialist</span>
                   <span className="text-gray-400 font-medium">www.m-coding.ie</span>
                   <span>Ardfinnan, Co. Tipperary</span>
@@ -400,7 +410,7 @@ export default function EngineStickerPage() {
 
               <div className="p-5">
                 {/* Header - Big Logo */}
-                <div className="flex justify-center mb-3">
+                <div className="flex justify-center mb-2">
                   <Image
                     src="/LogoFinal-01.png"
                     alt="M Coding Ireland"
@@ -408,6 +418,13 @@ export default function EngineStickerPage() {
                     height={120}
                     className="w-full max-w-[380px] h-auto"
                   />
+                </div>
+
+                {/* Assembled by text - Right under logo, bigger */}
+                <div className="text-center mb-3">
+                  <p className="text-base text-gray-200">
+                    Assembled with pride by: <span className="text-white font-bold">Maciej Cymerys</span>
+                  </p>
                 </div>
 
                 {/* Title */}
@@ -436,15 +453,8 @@ export default function EngineStickerPage() {
                   </div>
                 </div>
 
-                {/* Assembled by text */}
-                <div className="pt-3 border-t border-white/10 text-center">
-                  <p className="text-sm text-gray-300 italic">
-                    Assembled with pride by: <span className="text-white font-semibold not-italic">Maciej Cymerys</span>
-                  </p>
-                </div>
-
                 {/* Footer */}
-                <div className="mt-2 flex items-center justify-between text-[9px] text-gray-500">
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[9px] text-gray-500">
                   <span>BMW & MINI Specialist</span>
                   <span className="text-gray-400 font-medium">www.m-coding.ie</span>
                   <span>Ardfinnan, Co. Tipperary</span>
@@ -469,20 +479,22 @@ export default function EngineStickerPage() {
               <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
 
               <div className="p-4">
-                {/* Header Row - Logo and Title */}
-                <div className="flex items-center justify-between mb-3">
+                {/* Header - Bigger Logo */}
+                <div className="flex justify-center mb-2">
                   <Image
                     src="/LogoFinal-01.png"
                     alt="M Coding Ireland"
-                    width={220}
-                    height={70}
-                    className="h-12 w-auto"
+                    width={320}
+                    height={100}
+                    className="w-full max-w-[300px] h-auto"
                   />
-                  <div className="text-right">
-                    <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-wider">
-                      Service Record
-                    </h2>
-                  </div>
+                </div>
+
+                {/* Title */}
+                <div className="text-center mb-3">
+                  <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-wider">
+                    Service Record
+                  </h2>
                 </div>
 
                 {/* Divider */}
@@ -494,6 +506,7 @@ export default function EngineStickerPage() {
                   <div className="flex-1">
                     <div className="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Work Completed</div>
                     <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                      <StickerCheckbox checked={liquiMolyOil} label="Liqui Moly Oil" />
                       <StickerCheckbox checked={oilFilter} label="Oil Filter" />
                       <StickerCheckbox checked={airFilter} label="Air Filter" />
                       <StickerCheckbox checked={fuelFilter} label="Fuel Filter" />
