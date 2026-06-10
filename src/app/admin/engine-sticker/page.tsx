@@ -96,6 +96,12 @@ export default function EngineStickerPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-24 pb-12">
+      {/* Google Font for handwriting */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold text-white mb-2 text-center">Service Sticker Generator</h1>
         <p className="text-gray-400 text-center mb-8">Generate professional service stickers for the engine bay</p>
@@ -338,10 +344,13 @@ export default function EngineStickerPage() {
                   />
                 </div>
 
-                {/* Assembled by text - Right under logo, bigger */}
+                {/* Assembled by text - Handwriting font */}
                 <div className="text-center mb-4">
-                  <p className="text-base text-gray-200">
-                    Assembled with pride by: <span className="text-white font-bold">Maciej Cymerys</span>
+                  <p
+                    className="text-xl text-white"
+                    style={{ fontFamily: "'Dancing Script', cursive" }}
+                  >
+                    Assembled with pride by Maciej Cymerys
                   </p>
                 </div>
 
@@ -395,7 +404,7 @@ export default function EngineStickerPage() {
             </div>
           )}
 
-          {/* Complete Engine Rebuild Sticker - Landscape */}
+          {/* Complete Engine Rebuild Sticker - Simplified with handwriting */}
           {stickerType === "rebuild" && (
             <div
               ref={stickerRef}
@@ -408,53 +417,53 @@ export default function EngineStickerPage() {
             >
               <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
 
-              <div className="p-5">
+              <div className="p-6">
                 {/* Header - Big Logo */}
-                <div className="flex justify-center mb-2">
+                <div className="flex justify-center mb-4">
                   <Image
                     src="/LogoFinal-01.png"
                     alt="M Coding Ireland"
                     width={400}
                     height={120}
-                    className="w-full max-w-[380px] h-auto"
+                    className="w-full max-w-[400px] h-auto"
                   />
                 </div>
 
-                {/* Assembled by text - Right under logo, bigger */}
-                <div className="text-center mb-3">
-                  <p className="text-base text-gray-200">
-                    Assembled with pride by: <span className="text-white font-bold">Maciej Cymerys</span>
+                {/* Main Text - Handwriting font */}
+                <div className="text-center my-6">
+                  <p
+                    className="text-2xl text-white leading-relaxed"
+                    style={{ fontFamily: "'Dancing Script', cursive" }}
+                  >
+                    Engine rebuilt to M Coding standards
+                  </p>
+                  <p
+                    className="text-2xl text-white mt-1"
+                    style={{ fontFamily: "'Dancing Script', cursive" }}
+                  >
+                    by Maciej Cymerys
                   </p>
                 </div>
 
-                {/* Title */}
-                <div className="text-center mb-4">
-                  <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-wider">
-                    Complete Engine Rebuild
-                  </h2>
-                </div>
-
-                {/* Divider */}
-                <div className="h-px bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-red-500/50 mb-4" />
-
-                {/* Date and Mileage - Centered */}
-                <div className="flex justify-center gap-6 mb-4">
-                  <div className="w-44 bg-black/50 rounded-lg p-3 border border-white/10">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-wider text-center">Date</div>
-                    <div className="text-white font-bold text-lg text-center">
+                {/* Date and Mileage - Smaller, subtle */}
+                <div className="flex justify-center gap-6 mt-4">
+                  <div className="text-center">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wider">Date</div>
+                    <div className="text-white font-medium text-sm">
                       {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__ / ___ / ____'}
                     </div>
                   </div>
-                  <div className="w-44 bg-black/50 rounded-lg p-3 border border-white/10">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-wider text-center">Mileage</div>
-                    <div className="text-white font-bold text-lg text-center">
+                  <div className="text-gray-600">•</div>
+                  <div className="text-center">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wider">Mileage</div>
+                    <div className="text-white font-medium text-sm">
                       {mileage ? `${mileage} km` : '________ km'}
                     </div>
                   </div>
                 </div>
 
                 {/* Footer */}
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[9px] text-gray-500">
+                <div className="mt-6 pt-3 border-t border-white/10 flex items-center justify-between text-[9px] text-gray-500">
                   <span>BMW & MINI Specialist</span>
                   <span className="text-gray-400 font-medium">www.m-coding.ie</span>
                   <span>Ardfinnan, Co. Tipperary</span>
