@@ -107,7 +107,7 @@ export default function ServicesPage() {
               <div className="mb-6">
                 <p className="text-gray-400 text-sm mb-2">Starting from</p>
                 <p className="text-4xl font-bold text-white">€170</p>
-                <p className="text-gray-500 text-xs mt-1">*Based on 520D model</p>
+                <p className="text-gray-500 text-xs mt-1">*Based on 520D F10 model</p>
               </div>
               <ul className="space-y-2 mb-8">
                 <li className="flex items-start space-x-2">
@@ -144,7 +144,7 @@ export default function ServicesPage() {
               <div className="mb-6">
                 <p className="text-gray-400 text-sm mb-2">Starting from</p>
                 <p className="text-4xl font-bold text-white">€270</p>
-                <p className="text-gray-500 text-xs mt-1">*Based on 520D model</p>
+                <p className="text-gray-500 text-xs mt-1">*Based on 520D F10 model</p>
               </div>
               <ul className="space-y-2 mb-8">
                 <li className="flex items-start space-x-2">
@@ -196,7 +196,7 @@ export default function ServicesPage() {
               <div className="mb-6">
                 <p className="text-gray-400 text-sm mb-2">Starting from</p>
                 <p className="text-4xl font-bold text-white">€350</p>
-                <p className="text-gray-500 text-xs mt-1">*Based on 520D model</p>
+                <p className="text-gray-500 text-xs mt-1">*Based on 520D F10 model</p>
               </div>
               <ul className="space-y-2 mb-8">
                 <li className="flex items-start space-x-2">
@@ -249,7 +249,7 @@ export default function ServicesPage() {
               <div className="mb-6">
                 <p className="text-gray-400 text-sm mb-2">Starting from</p>
                 <p className="text-4xl font-bold text-white">€480</p>
-                <p className="text-gray-500 text-xs mt-1">*Based on 520D model</p>
+                <p className="text-gray-500 text-xs mt-1">*Based on 520D F10 model</p>
               </div>
               <ul className="space-y-2 mb-8">
                 <li className="flex items-start space-x-2">
@@ -301,8 +301,8 @@ export default function ServicesPage() {
           {/* Pricing Note */}
           <div className="mt-12 text-center">
             <p className="text-gray-400 text-sm max-w-3xl mx-auto mb-8">
-              * Prices are based on BMW 520D model and may vary depending on vehicle model, engine type, and oil capacity.
-              Contact us for a detailed quote tailored to your specific BMW or MINI. All services include quality guarantee and expert care.
+              * Prices are based on the BMW 520D F10 model and may vary depending on vehicle model, engine type, and oil capacity.
+              Later models such as the G30 are typically priced slightly higher. Contact us for a detailed quote tailored to your specific BMW or MINI. All services include quality guarantee and expert care.
             </p>
 
             {/* Help Box */}
