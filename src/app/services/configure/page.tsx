@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronDown,
   Plus,
   Cog,
   Fuel,
@@ -305,6 +306,7 @@ export default function ConfigurePage() {
   const [xdrive, setXdrive] = useState(false);
   const [freebies, setFreebies] = useState<string[]>(DEFAULT_FREEBIES);
   const [registration, setRegistration] = useState("");
+  const [lookupOpen, setLookupOpen] = useState(false);
 
   const engine = getEngine(engineId);
 
@@ -481,13 +483,24 @@ export default function ConfigurePage() {
 
                 {/* Quick lookup: common model → engine */}
                 <div className="mb-5 overflow-hidden rounded-xl border border-white/10 bg-black/20">
-                  <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-white/[0.03] px-3 py-2">
+                  <button
+                    type="button"
+                    onClick={() => setLookupOpen((o) => !o)}
+                    aria-expanded={lookupOpen}
+                    className={`flex w-full items-center justify-between gap-2 bg-white/[0.03] px-3 py-2 text-left transition-colors hover:bg-white/[0.06] ${
+                      lookupOpen ? "border-b border-white/10" : ""
+                    }`}
+                  >
                     <span className="flex items-center gap-2 text-xs font-semibold text-gray-300">
                       <Search size={13} className="text-blue-400" />
-                      Quick lookup — find your engine
+                      Not sure? Find your engine by model
                     </span>
-                    <span className="text-[10px] uppercase tracking-wide text-gray-500">tap to select</span>
-                  </div>
+                    <ChevronDown
+                      size={15}
+                      className={`flex-shrink-0 text-gray-400 transition-transform ${lookupOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {lookupOpen && (
                   <div className="divide-y divide-white/5">
                     {MODEL_LOOKUP.map((row) => {
                       const eng = getEngine(row.engineId);
@@ -520,6 +533,7 @@ export default function ConfigurePage() {
                       );
                     })}
                   </div>
+                  )}
                 </div>
 
                 <div className="space-y-5">
