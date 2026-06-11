@@ -92,6 +92,9 @@ export interface Addon {
   desc: string;
   /** which fuel types this add-on applies to */
   fuel: Fuel | "both";
+  /** Optional explainer tooltip (string or multiple paragraphs) + heading. */
+  tip?: string | string[];
+  tipTitle?: string;
 }
 
 export const ADDONS: Addon[] = [
@@ -111,11 +114,24 @@ export interface Extra {
   fuel?: Fuel;
   /** Restrict to xDrive (all-wheel-drive) vehicles. */
   xdrive?: boolean;
+  /** Optional explainer tooltip (string or multiple paragraphs) + heading. */
+  tip?: string | string[];
+  tipTitle?: string;
 }
 
 export const EXTRAS: Extra[] = [
   { id: "engine-flush", name: "Liqui Moly Engine Flush 300ml", price: 15, note: "Cleans internal engine deposits before the oil change" },
-  { id: "ceratec", name: "Liqui Moly Ceratec", price: 35, note: "Ceramic wear protection & friction reduction additive" },
+  {
+    id: "ceratec",
+    name: "Liqui Moly Ceratec",
+    price: 35,
+    note: "Ceramic wear protection & friction reduction additive",
+    tipTitle: "Why add Ceratec?",
+    tip: [
+      "Ceratec is a ceramic (boron-nitride) additive that coats your engine's internals to cut friction and wear — for a smoother, quieter engine, better cold-start protection and a small gain in fuel economy.",
+      "Its protective layer lasts roughly 50,000 km, so it doesn't need topping up at every oil change. Applying it every second or third service keeps the protection in place while keeping your costs down.",
+    ],
+  },
   { id: "diesel-purge", name: "Liqui Moly Diesel Purge", price: 30, note: "In-tank fuel additive that cleans the diesel injection system", fuel: "diesel" },
   { id: "fuel-cleaner", name: "Fuel System Cleaner Additive", price: 30, note: "In-tank additive that cleans the petrol fuel system & injectors", fuel: "petrol" },
   { id: "brake-fluid", name: "Brake Fluid Change", price: 50, note: "Brake fluid change to BMW procedure (not a full system bleed)" },

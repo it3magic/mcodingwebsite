@@ -114,8 +114,9 @@ function highlightX(text: string) {
 }
 
 /** Small "?" help icon that reveals a short explainer on hover (desktop) or tap (mobile). */
-function InfoTip({ label, text }: { label: string; text: string }) {
+function InfoTip({ label, text }: { label: string; text: string | string[] }) {
   const [open, setOpen] = useState(false);
+  const paragraphs = Array.isArray(text) ? text : [text];
   return (
     <span
       className="relative inline-flex"
@@ -136,8 +137,14 @@ function InfoTip({ label, text }: { label: string; text: string }) {
       </button>
       {open && (
         <div className="absolute left-0 top-6 z-50 w-64 max-w-[calc(100vw-3rem)] rounded-xl border border-white/15 bg-zinc-900 p-3 text-left shadow-2xl shadow-black/50">
-          <p className="mb-1 text-xs font-semibold text-white">{label}</p>
-          <p className="text-xs leading-relaxed text-gray-400">{text}</p>
+          <p className="mb-1.5 text-xs font-semibold text-white">{label}</p>
+          <div className="space-y-1.5">
+            {paragraphs.map((p, i) => (
+              <p key={i} className="text-xs leading-relaxed text-gray-400">
+                {p}
+              </p>
+            ))}
+          </div>
         </div>
       )}
     </span>
@@ -150,6 +157,8 @@ function ToggleRow({
   onClick,
   label,
   desc,
+  tip,
+  tipLabel,
   priceLabel,
   priceActive,
 }: {
@@ -157,14 +166,26 @@ function ToggleRow({
   onClick: () => void;
   label: string;
   desc?: string;
+  tip?: string | string[];
+  tipLabel?: string;
   priceLabel: string;
   priceActive: boolean;
 }) {
   return (
-    <button
-      type="button"
+    <div
+      role="checkbox"
+      aria-checked={active}
+      aria-label={label}
+      tabIndex={0}
       onClick={onClick}
-      className={`group flex w-full items-start gap-4 rounded-xl border p-4 text-left transition-all ${
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className={`group flex w-full cursor-pointer items-start gap-4 rounded-xl border p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
         active
           ? "border-blue-500/60 bg-blue-500/10"
           : "border-white/10 bg-zinc-900/40 hover:border-white/25 hover:bg-zinc-900/70"
@@ -181,7 +202,10 @@ function ToggleRow({
       </span>
       <div className="flex-1">
         <div className="flex items-center justify-between gap-3">
-          <span className="font-semibold text-white">{label}</span>
+          <span className="flex items-center gap-1.5 font-semibold text-white">
+            {label}
+            {tip && <InfoTip label={tipLabel ?? `About ${label}`} text={tip} />}
+          </span>
           <span
             className={`flex-shrink-0 text-sm font-semibold ${
               priceActive ? "text-blue-300" : "text-gray-400"
@@ -192,7 +216,7 @@ function ToggleRow({
         </div>
         {desc && <p className="mt-1 text-sm text-gray-400">{desc}</p>}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -582,6 +606,8 @@ export default function ConfigurePage() {
                           onClick={() => toggle(a.id, addons, setAddons)}
                           label={a.label}
                           desc={breakdown}
+                          tip={a.tip}
+                          tipLabel={a.tipTitle}
                           priceActive={addons.includes(a.id) && tot !== null}
                           priceLabel={tot === null ? "On request" : `+${formatEur(tot)}`}
                         />
@@ -638,6 +664,8 @@ export default function ConfigurePage() {
                         onClick={() => toggle(e.id, extras, setExtras)}
                         label={e.name}
                         desc={e.note}
+                        tip={e.tip}
+                        tipLabel={e.tipTitle}
                         priceActive={extras.includes(e.id) && e.price !== null}
                         priceLabel={e.price === null ? "On request" : `+${formatEur(e.price)}`}
                       />
