@@ -99,9 +99,9 @@ export interface Addon {
 
 export const ADDONS: Addon[] = [
   { id: "air-filter", label: "Air Filter", desc: "Engine air filter replacement", fuel: "both", tipTitle: "How often?", tip: "A clogged air filter restricts airflow and hurts throttle response, power and economy. We recommend replacing it every second service or 30,000 km." },
-  { id: "fuel-filter", label: "Fuel Filter", desc: "Diesel fuel filter replacement", fuel: "diesel" },
-  { id: "spark-plugs", label: "Spark Plugs", desc: "Replace the full set of spark plugs", fuel: "petrol", tipTitle: "How often?", tip: "Worn plugs cause misfires, rough running and poor economy. We recommend fresh spark plugs every ~60,000 km (around every 4 years) — turbo petrol engines especially benefit." },
-  { id: "cabin-filter", label: "Cabin / Pollen Filter", desc: "Price varies by model — confirmed on booking", fuel: "both" },
+  { id: "fuel-filter", label: "Fuel Filter", desc: "Diesel fuel filter replacement", fuel: "diesel", tipTitle: "How often?", tip: "The diesel fuel filter protects the high-pressure pump and injectors from dirt and water. We recommend replacing it around every 60,000 km — cheap insurance for an expensive injection system." },
+  { id: "spark-plugs", label: "Spark Plugs", desc: "Replace the full set of spark plugs", fuel: "petrol", tipTitle: "How often?", tip: "Worn plugs cause misfires, rough running and poor economy. We recommend fresh spark plugs every 50,000–60,000 km (around every 4 years) — sooner on tuned or hard-driven turbo engines." },
+  { id: "cabin-filter", label: "Cabin / Pollen Filter", desc: "Price varies by model — confirmed on booking", fuel: "both", tipTitle: "How often?", tip: "The cabin (pollen) filter cleans the air coming into your ventilation. We recommend a fresh one once a year or every 20,000–30,000 km — sooner if airflow drops, the cabin smells musty, or you suffer from allergies." },
 ];
 
 export interface Extra {
