@@ -65,7 +65,7 @@ function buildBaseLines(engine: Engine, oilId: string): Line[] {
     {
       key: "oil-filter",
       label: `Oil filter (${engine.code})`,
-      sub: "Genuine-spec replacement",
+      sub: "High-quality Bosch or Mann filter",
       price: engine.oilFilter,
     },
   ];
