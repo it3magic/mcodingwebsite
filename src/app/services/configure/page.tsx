@@ -67,7 +67,7 @@ function buildBaseLines(engine: Engine, oilId: string): Line[] {
       key: "oil-filter",
       label: `Oil filter (${engine.code})`,
       sub: "High-quality Bosch or Mann filter",
-      tip: "Bosch and Mann+Hummel are original-equipment (OE) suppliers to BMW — many genuine BMW filters are made on their production lines. You get the same OE filtration quality and engine protection, without paying for the dealer badge.",
+      tip: "Mann+Hummel (Mann-Filter) is an original-equipment (OE) supplier to BMW — many genuine BMW filters come off its production lines, so you get factory filtration quality. Bosch is a trusted premium-brand alternative built to the same specification. Either way you get OE-grade protection without paying for the dealer badge.",
       price: engine.oilFilter,
     },
   ];

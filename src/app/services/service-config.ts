@@ -120,7 +120,17 @@ export interface Extra {
 }
 
 export const EXTRAS: Extra[] = [
-  { id: "engine-flush", name: "Liqui Moly Engine Flush 300ml", price: 15, note: "Cleans internal engine deposits before the oil change" },
+  {
+    id: "engine-flush",
+    name: "Liqui Moly Engine Flush 300ml",
+    price: 15,
+    note: "Cleans internal engine deposits before the oil change",
+    tipTitle: "When do we use it?",
+    tip: [
+      "We recommend an engine flush on your first service with us, as we can't see how the car was cared for before. It loosens sludge and deposits so they drain away with the old oil, leaving the engine internally clean.",
+      "When we remove the old oil filter we inspect it: if it's clean with no debris, your engine is healthy and won't need a flush again. If we find debris, we'll keep flushing at each service until it runs clean.",
+    ],
+  },
   {
     id: "ceratec",
     name: "Liqui Moly Ceratec",
@@ -132,12 +142,40 @@ export const EXTRAS: Extra[] = [
       "Its protective layer lasts roughly 50,000 km, so it doesn't need topping up at every oil change. Applying it every second or third service keeps the protection in place while keeping your costs down.",
     ],
   },
-  { id: "diesel-purge", name: "Liqui Moly Diesel Purge", price: 30, note: "In-tank fuel additive that cleans the diesel injection system", fuel: "diesel" },
-  { id: "fuel-cleaner", name: "Fuel System Cleaner Additive", price: 30, note: "In-tank additive that cleans the petrol fuel system & injectors", fuel: "petrol" },
+  {
+    id: "diesel-purge",
+    name: "Liqui Moly Diesel Purge",
+    price: 30,
+    note: "In-tank fuel additive that cleans the diesel injection system",
+    fuel: "diesel",
+    tipTitle: "Why use it?",
+    tip: [
+      "Diesel Purge cleans the injectors, pump and combustion chamber and restores a proper spray pattern — for smoother running, easier starting, better economy and lower emissions, while helping prevent costly injector problems.",
+      "For most cars, using it every other service is enough to keep the diesel injection system clean and protected.",
+    ],
+  },
+  {
+    id: "fuel-cleaner",
+    name: "Fuel System Cleaner Additive",
+    price: 30,
+    note: "In-tank additive that cleans the petrol fuel system & injectors",
+    fuel: "petrol",
+    tipTitle: "Why use it?",
+    tip: [
+      "This additive cleans the injectors, intake valves and combustion chamber, clearing carbon deposits and restoring spray pattern — for smoother running, sharper throttle response and better fuel economy.",
+      "Using it every other service keeps deposits from building back up and helps protect the fuel system long-term.",
+    ],
+  },
   { id: "brake-fluid", name: "Brake Fluid Change", price: 50, note: "Brake fluid change to BMW procedure (not a full system bleed)" },
-  { id: "rear-diff", name: "Rear Differential Oil Change", price: 80, note: "Drain & refill the rear differential" },
+  { id: "rear-diff", name: "Rear Differential Oil Change", price: 80, note: "Drain & refill the rear differential", tipTitle: "How often?", tip: [
+      "BMW often lists differential oil as \"lifetime\", but it breaks down with heat and use. We recommend changing it roughly every 60,000–80,000 km — sooner if you tow, track the car or drive it hard.",
+      "Fresh oil protects the gears and bearings, reduces wear and keeps the differential running quietly.",
+    ] },
   { id: "transfer-box", name: "Transfer Box Oil Change", price: 150, note: "xDrive only — transfer case fluid service", xdrive: true },
-  { id: "front-diff", name: "Front Differential Fluid Change", price: 80, note: "xDrive only — front differential service", xdrive: true },
+  { id: "front-diff", name: "Front Differential Fluid Change", price: 80, note: "xDrive only — front differential service", xdrive: true, tipTitle: "How often?", tip: [
+      "BMW often lists differential oil as \"lifetime\", but it breaks down with heat and use. We recommend changing it roughly every 60,000–80,000 km — sooner if you tow, track the car or drive it hard.",
+      "Fresh oil protects the gears and bearings, reduces wear and keeps the differential running quietly.",
+    ] },
   { id: "battery-test", name: "Battery Health Test", price: 25, note: "Battery condition check" },
   { id: "diagnostics", name: "Diagnostics Scan", price: 45, note: "Dealer-level ISTA diagnostics of the complete vehicle" },
   { id: "wipers", name: "Windscreen Wipers", price: null, note: "Price varies by model" },
