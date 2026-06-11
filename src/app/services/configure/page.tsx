@@ -10,6 +10,7 @@ import {
   Cog,
   Fuel,
   Gift,
+  HelpCircle,
   Info,
   Lock,
   Sparkles,
@@ -44,7 +45,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 
 const DEFAULT_FREEBIES = ["screen-wash", "air-freshener"];
 
-type Line = { key: string; label: string; sub?: string; price: number | null };
+type Line = { key: string; label: string; sub?: string; tip?: string; price: number | null };
 
 /** Always-included base line items: labour + oil + oil filter (same for every engine). */
 function buildBaseLines(engine: Engine, oilId: string): Line[] {
@@ -66,6 +67,7 @@ function buildBaseLines(engine: Engine, oilId: string): Line[] {
       key: "oil-filter",
       label: `Oil filter (${engine.code})`,
       sub: "High-quality Bosch or Mann filter",
+      tip: "Bosch and Mann+Hummel are original-equipment (OE) suppliers to BMW — many genuine BMW filters are made on their production lines. You get the same OE filtration quality and engine protection, without paying for the dealer badge.",
       price: engine.oilFilter,
     },
   ];
@@ -109,6 +111,37 @@ function highlightX(text: string) {
       <span key={i}>{part}</span>
     );
   });
+}
+
+/** Small "?" help icon that reveals a short explainer on hover (desktop) or tap (mobile). */
+function InfoTip({ label, text }: { label: string; text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span
+      className="relative inline-flex"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((o) => !o);
+        }}
+        aria-label={label}
+        aria-expanded={open}
+        className="flex h-4 w-4 items-center justify-center rounded-full border border-white/20 text-gray-400 transition-colors hover:border-blue-500/50 hover:text-blue-300"
+      >
+        <HelpCircle size={11} />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-6 z-50 w-64 max-w-[calc(100vw-3rem)] rounded-xl border border-white/15 bg-zinc-900 p-3 text-left shadow-2xl shadow-black/50">
+          <p className="mb-1 text-xs font-semibold text-white">{label}</p>
+          <p className="text-xs leading-relaxed text-gray-400">{text}</p>
+        </div>
+      )}
+    </span>
+  );
 }
 
 /** Reusable checkbox row used for add-ons and extras. */
@@ -523,7 +556,12 @@ export default function ConfigurePage() {
                               {l.price === null ? "On request" : formatEur(l.price)}
                             </span>
                           </div>
-                          {l.sub && <p className="mt-1 text-sm text-gray-400">{l.sub}</p>}
+                          {l.sub && (
+                            <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-400">
+                              <span>{l.sub}</span>
+                              {l.tip && <InfoTip label="Why Bosch or Mann?" text={l.tip} />}
+                            </p>
+                          )}
                         </div>
                       </div>
                     ))}
