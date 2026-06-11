@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Info,
   Lock,
+  Search,
   Sparkles,
   Wrench,
 } from "lucide-react";
@@ -40,6 +41,17 @@ import {
 
 const ENGINES_F = ENGINES.filter((e) => e.chassis === "F Series");
 const ENGINES_G30 = ENGINES.filter((e) => e.chassis === "G30");
+
+/** Compact "common model → engine" lookup for quick scanning at the top of Step 1. */
+const MODEL_LOOKUP: { models: string; years: string; engineId: string }[] = [
+  { models: "320d · 520d · 118d/120d · X1/X3 20d", years: "2010–2014", engineId: "f-n47" },
+  { models: "330d · 530d · 535d · X3/X5 30d/40d", years: "2008–2016", engineId: "f-n57" },
+  { models: "320d · 520d · 118d/120d", years: "2015–2019", engineId: "f-b47" },
+  { models: "520d · 320d (G20) · X3 20d", years: "2017 on", engineId: "g30-b47" },
+  { models: "530d · 540d · 330d · 730d", years: "2017 on", engineId: "g30-b57" },
+  { models: "520i · 530i · 530e · 320i/330i", years: "2017 on", engineId: "g30-b48" },
+  { models: "540i · 340i · M340i · 740i", years: "2017 on", engineId: "g30-b58" },
+];
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -466,6 +478,50 @@ export default function ConfigurePage() {
                   <span className="font-semibold text-gray-300">&ldquo;Don&apos;t see your car here?&rdquo;</span>{" "}
                   is below.
                 </p>
+
+                {/* Quick lookup: common model → engine */}
+                <div className="mb-5 overflow-hidden rounded-xl border border-white/10 bg-black/20">
+                  <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-white/[0.03] px-3 py-2">
+                    <span className="flex items-center gap-2 text-xs font-semibold text-gray-300">
+                      <Search size={13} className="text-blue-400" />
+                      Quick lookup — find your engine
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wide text-gray-500">tap to select</span>
+                  </div>
+                  <div className="divide-y divide-white/5">
+                    {MODEL_LOOKUP.map((row) => {
+                      const eng = getEngine(row.engineId);
+                      if (!eng) return null;
+                      const active = engineId === row.engineId;
+                      return (
+                        <button
+                          key={row.engineId}
+                          type="button"
+                          onClick={() => setEngineId(row.engineId)}
+                          className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
+                            active ? "bg-blue-500/15" : "hover:bg-white/5"
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs leading-snug text-gray-200">{row.models}</p>
+                            <p className="text-[10px] text-gray-500">{row.years}</p>
+                          </div>
+                          <span className="flex flex-shrink-0 items-center gap-1.5">
+                            <span
+                              className={`text-sm font-bold ${active ? "text-blue-300" : "text-white"}`}
+                            >
+                              {eng.code}
+                            </span>
+                            <span className="rounded border border-white/15 px-1 py-0.5 text-[9px] font-semibold uppercase text-gray-400">
+                              {eng.chassis === "G30" ? "G" : "F"}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="space-y-5">
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
