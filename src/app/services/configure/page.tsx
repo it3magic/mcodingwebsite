@@ -87,13 +87,26 @@ function FuelBadge({ fuel }: { fuel: Engine["fuel"] }) {
   );
 }
 
-function StepBadge({ n, label }: { n: number; label: string }) {
+function StepBadge({
+  n,
+  label,
+  tip,
+  tipTitle,
+}: {
+  n: number;
+  label: string;
+  tip?: string | string[];
+  tipTitle?: string;
+}) {
   return (
     <div className="mb-5 flex items-center gap-3">
       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 via-purple-600 to-red-600 text-sm font-bold text-white">
         {n}
       </span>
-      <h2 className="text-xl font-bold text-white">{label}</h2>
+      <h2 className="flex items-center gap-2 text-xl font-bold text-white">
+        {label}
+        {tip && <InfoTip label={tipTitle ?? label} text={tip} />}
+      </h2>
     </div>
   );
 }
@@ -492,7 +505,15 @@ export default function ConfigurePage() {
                   engine ? "opacity-100" : "opacity-60"
                 }`}
               >
-                <StepBadge n={2} label="Choose your engine oil" />
+                <StepBadge
+                  n={2}
+                  label="Choose your engine oil"
+                  tipTitle="Which oil should I choose?"
+                  tip={[
+                    "LL-04 is BMW's own oil approval (Longlife-04) — every oil we offer meets the spec your engine needs. Standard LL04 is a quality approved oil for everyday driving; TopTec 4200 is a premium German oil with better protection and cleanliness (our pick).",
+                    "Molygen adds Liqui Moly's friction-reducing technology for extra wear protection (don't combine it with Ceratec). BMW Genuine 0W-30 is the exact factory oil BMW dealers use.",
+                  ]}
+                />
                 <div className="space-y-3">
                   {OIL_OPTIONS.map((o) => {
                     const active = oilId === o.id;

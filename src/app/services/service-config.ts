@@ -140,6 +140,7 @@ export const EXTRAS: Extra[] = [
     tip: [
       "Ceratec is a ceramic (boron-nitride) additive that coats your engine's internals to cut friction and wear — for a smoother, quieter engine, better cold-start protection and a small gain in fuel economy.",
       "Its protective layer lasts roughly 50,000 km, so it doesn't need topping up at every oil change. Applying it every second or third service keeps the protection in place while keeping your costs down.",
+      "Note: Ceratec isn't recommended with Liqui Moly Molygen oil, as Molygen already contains its own friction-reducing additive.",
     ],
   },
   {
@@ -166,18 +167,27 @@ export const EXTRAS: Extra[] = [
       "Using it every other service keeps deposits from building back up and helps protect the fuel system long-term.",
     ],
   },
-  { id: "brake-fluid", name: "Brake Fluid Change", price: 50, note: "Brake fluid change to BMW procedure (not a full system bleed)" },
+  { id: "brake-fluid", name: "Brake Fluid Change", price: 50, note: "Brake fluid change to BMW procedure (not a full system bleed)", tipTitle: "How often?", tip: [
+      "Brake fluid absorbs moisture from the air over time, which lowers its boiling point and can cause a soft pedal or brake fade under hard use.",
+      "BMW recommends a brake fluid change every 2 years regardless of mileage — cheap insurance for safe, consistent braking.",
+    ] },
   { id: "rear-diff", name: "Rear Differential Oil Change", price: 80, note: "Drain & refill the rear differential", tipTitle: "How often?", tip: [
       "BMW often lists differential oil as \"lifetime\", but it breaks down with heat and use. We recommend changing it roughly every 60,000–80,000 km — sooner if you tow, track the car or drive it hard.",
       "Fresh oil protects the gears and bearings, reduces wear and keeps the differential running quietly.",
     ] },
-  { id: "transfer-box", name: "Transfer Box Oil Change", price: 150, note: "xDrive only — transfer case fluid service", xdrive: true },
+  { id: "transfer-box", name: "Transfer Box Oil Change", price: 150, note: "xDrive only — transfer case fluid service", xdrive: true, tipTitle: "How often?", tip: [
+      "The xDrive transfer case splits drive between the front and rear axles and runs hot. BMW often calls it a \"lifetime\" fill, but the oil still degrades.",
+      "We recommend changing it roughly every 60,000–80,000 km — sooner for hard or towing use — to keep the all-wheel-drive system smooth and prevent premature wear.",
+    ] },
   { id: "front-diff", name: "Front Differential Fluid Change", price: 80, note: "xDrive only — front differential service", xdrive: true, tipTitle: "How often?", tip: [
       "BMW often lists differential oil as \"lifetime\", but it breaks down with heat and use. We recommend changing it roughly every 60,000–80,000 km — sooner if you tow, track the car or drive it hard.",
       "Fresh oil protects the gears and bearings, reduces wear and keeps the differential running quietly.",
     ] },
   { id: "battery-test", name: "Battery Health Test", price: 25, note: "Battery condition check" },
-  { id: "diagnostics", name: "Diagnostics Scan", price: 45, note: "Dealer-level ISTA diagnostics of the complete vehicle" },
+  { id: "diagnostics", name: "Diagnostics Scan", price: 45, note: "Dealer-level ISTA diagnostics of the complete vehicle", tipTitle: "What does it cover?", tip: [
+      "We use BMW's dealer-level ISTA software to read every control module on the car — engine, gearbox, ABS/DSC, airbags, body, comfort and infotainment.",
+      "It pulls stored and pending fault codes (including faults not yet showing a dashboard light), so we can pinpoint issues accurately rather than guessing.",
+    ] },
   { id: "wipers", name: "Windscreen Wipers", price: null, note: "Price varies by model" },
 ];
 
