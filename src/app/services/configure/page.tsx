@@ -45,7 +45,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 
 const DEFAULT_FREEBIES = ["screen-wash", "air-freshener"];
 
-type Line = { key: string; label: string; sub?: string; tip?: string; price: number | null };
+type Line = { key: string; label: string; sub?: string; tip?: string | string[]; tipTitle?: string; price: number | null };
 
 /** Always-included base line items: labour + oil + oil filter (same for every engine). */
 function buildBaseLines(engine: Engine, oilId: string): Line[] {
@@ -67,7 +67,11 @@ function buildBaseLines(engine: Engine, oilId: string): Line[] {
       key: "oil-filter",
       label: `Oil filter (${engine.code})`,
       sub: "High-quality Bosch or Mann filter",
-      tip: "Mann+Hummel (Mann-Filter) is an original-equipment (OE) supplier to BMW — many genuine BMW filters come off its production lines, so you get factory filtration quality. Bosch is a trusted premium-brand alternative built to the same specification. Either way you get OE-grade protection without paying for the dealer badge.",
+      tipTitle: "About the oil filter",
+      tip: [
+        "Mann+Hummel (Mann-Filter) is an original-equipment (OE) supplier to BMW — many genuine BMW filters come off its production lines, so you get factory filtration quality. Bosch is a trusted premium-brand alternative built to the same specification.",
+        "The oil filter is replaced at every service. Our recommendation is a service every 15,000 km, so fresh oil and clean filtration are always protecting your engine.",
+      ],
       price: engine.oilFilter,
     },
   ];
@@ -456,14 +460,16 @@ export default function ConfigurePage() {
               <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6">
                 <StepBadge n={1} label="Select your engine" />
                 <p className="-mt-2 mb-5 text-xs leading-relaxed text-gray-500">
-                  Tip: the <span className="font-bold text-blue-300">x</span> in codes like{" "}
-                  <span className="font-bold text-blue-300">x</span>20d is a placeholder for your series — e.g.
-                  520d (5&nbsp;Series) or 320d (3&nbsp;Series).
+                  Tip: match your model badge and year to the engines below — e.g. a 2013
+                  320d is an N47, a 2016 520d is a B47. Most Irish BMWs are the N47 or B47
+                  (2.0&nbsp;diesel). Not sure?{" "}
+                  <span className="font-semibold text-gray-300">&ldquo;Don&apos;t see your car here?&rdquo;</span>{" "}
+                  is below.
                 </p>
                 <div className="space-y-5">
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
-                      <Cog size={16} className="text-blue-400" /> F Series
+                      <Cog size={16} className="text-blue-400" /> F Series (2010–2019)
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {ENGINES_F.map(renderEngineButton)}
@@ -471,7 +477,7 @@ export default function ConfigurePage() {
                   </div>
                   <div>
                     <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
-                      <Cog size={16} className="text-purple-400" /> G30
+                      <Cog size={16} className="text-purple-400" /> G30 (2017 on)
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {ENGINES_G30.map(renderEngineButton)}
@@ -604,7 +610,7 @@ export default function ConfigurePage() {
                           {l.sub && (
                             <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-400">
                               <span>{l.sub}</span>
-                              {l.tip && <InfoTip label="Why Bosch or Mann?" text={l.tip} />}
+                              {l.tip && <InfoTip label={l.tipTitle ?? l.label} text={l.tip} />}
                             </p>
                           )}
                         </div>

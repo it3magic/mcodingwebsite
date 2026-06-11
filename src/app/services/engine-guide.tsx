@@ -62,12 +62,12 @@ export function EngineHelpTooltip() {
         <div className="absolute left-0 top-7 z-50 w-72 max-w-[calc(100vw-3rem)] rounded-xl border border-white/15 bg-zinc-900 p-4 shadow-2xl shadow-black/50">
           <p className="mb-1 text-sm font-semibold text-white">Which engine do I have?</p>
           <p className="mb-3 text-xs text-gray-500">
-            The <span className="font-bold text-blue-400">x</span> is a placeholder for your series — e.g.
-            520d (5&nbsp;Series) or 320d (3&nbsp;Series).
+            Match your model badge and year below. Most Irish BMWs are the N47 or B47
+            (2.0&nbsp;diesel).
           </p>
           <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-            <EngineGroup title="F Series" list={F_ENGINES} />
-            <EngineGroup title="G30" list={G_ENGINES} />
+            <EngineGroup title="F Series (2010–2019)" list={F_ENGINES} />
+            <EngineGroup title="G30 (2017 on)" list={G_ENGINES} />
           </div>
         </div>
       )}
