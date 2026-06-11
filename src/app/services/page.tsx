@@ -128,10 +128,10 @@ export default function ServicesPage() {
                 </li>
               </ul>
               <Link
-                href="/contact?package=interim"
+                href="/services/configure?package=interim"
                 className="block w-full px-6 py-3 bg-white/5 border border-white/20 text-white text-center font-semibold rounded-lg hover:bg-white/10 transition-all"
               >
-                Book Now
+                Configure &amp; Book
               </Link>
             </div>
 
@@ -177,10 +177,10 @@ export default function ServicesPage() {
                 </li>
               </ul>
               <Link
-                href="/contact?package=major"
+                href="/services/configure?package=major"
                 className="block w-full px-6 py-3 bg-white/5 border border-white/20 text-white text-center font-semibold rounded-lg hover:bg-white/10 transition-all"
               >
-                Book Now
+                Configure &amp; Book
               </Link>
             </div>
 
@@ -233,10 +233,10 @@ export default function ServicesPage() {
                 </li>
               </ul>
               <Link
-                href="/contact?package=premium"
+                href="/services/configure?package=premium"
                 className="block w-full px-6 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white text-center font-semibold rounded-lg hover:opacity-90 transition-all shadow-lg shadow-blue-500/30"
               >
-                Book Now
+                Configure &amp; Book
               </Link>
             </div>
 
@@ -290,10 +290,10 @@ export default function ServicesPage() {
                 </li>
               </ul>
               <Link
-                href="/contact?package=platinum"
+                href="/services/configure?package=platinum"
                 className="block w-full px-6 py-3 bg-white/5 border border-white/20 text-white text-center font-semibold rounded-lg hover:bg-white/10 transition-all"
               >
-                Book Now
+                Configure &amp; Book
               </Link>
             </div>
           </div>

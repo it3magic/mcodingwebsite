@@ -5,9 +5,11 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackFormSubmission, trackWhatsAppClick } from "@/components/GoogleAnalytics";
 import NotificationBannerInline from "@/components/notification-banner-inline";
+import { EngineHelpTooltip } from "../services/engine-guide";
 
 function ContactForm() {
   const searchParams = useSearchParams();
+  const [configuredService, setConfiguredService] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,23 +35,39 @@ function ContactForm() {
       document.head.appendChild(meta);
     }
 
-    // Pre-fill service from URL parameter
+    // Pre-fill service + configured details from URL parameters
     const packageParam = searchParams.get('package');
-    if (packageParam) {
-      const serviceMap: { [key: string]: string } = {
-        'interim': 'Interim Service (€170)',
-        'major': 'Major Service (€270)',
-        'premium': 'Premium Service (€350)',
-        'platinum': 'Platinum Service (€480)',
-      };
+    const detailsParam = searchParams.get('details');
+    const serviceParam = searchParams.get('service');
+    const registrationParam = searchParams.get('registration');
 
-      const serviceName = serviceMap[packageParam];
-      if (serviceName) {
-        setFormData(prev => ({
-          ...prev,
-          service: serviceName,
-        }));
-      }
+    const serviceMap: { [key: string]: string } = {
+      'interim': 'Interim Service (€170)',
+      'major': 'Major Service (€270)',
+      'premium': 'Premium Service (€350)',
+      'platinum': 'Platinum Service (€480)',
+    };
+
+    // A free-form service label from the configurator (e.g. "G30 B58 — B58 Full Service")
+    if (serviceParam) {
+      setConfiguredService(serviceParam);
+    }
+
+    const resolvedService = serviceParam
+      ? serviceParam
+      : packageParam && serviceMap[packageParam]
+        ? serviceMap[packageParam]
+        : "";
+
+    if (resolvedService || detailsParam || registrationParam) {
+      setFormData(prev => ({
+        ...prev,
+        ...(resolvedService ? { service: resolvedService } : {}),
+        ...(registrationParam ? { registration: registrationParam } : {}),
+        ...(detailsParam
+          ? { message: `I'd like to book the following:\n\n${detailsParam}\n\n` }
+          : {}),
+      }));
     }
   }, [searchParams]);
 
@@ -318,9 +336,12 @@ function ContactForm() {
                     </div>
 
                     <div>
-                      <label htmlFor="service" className="block text-sm font-medium text-gray-300 mb-2">
-                        Service Required *
-                      </label>
+                      <div className="mb-2 flex items-center gap-2">
+                        <label htmlFor="service" className="text-sm font-medium text-gray-300">
+                          Service Required *
+                        </label>
+                        <EngineHelpTooltip />
+                      </div>
                       <select
                         id="service"
                         name="service"
@@ -330,6 +351,11 @@ function ContactForm() {
                         className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
                       >
                         <option value="">Select a service</option>
+                        {configuredService && (
+                          <optgroup label="Your Configured Service">
+                            <option value={configuredService}>{configuredService}</option>
+                          </optgroup>
+                        )}
                         <optgroup label="Service Packages">
                           <option value="Interim Service (€170)">Interim Service (€170)</option>
                           <option value="Major Service (€270)">Major Service (€270)</option>
