@@ -307,8 +307,32 @@ export function addonPart(engine: Engine, id: AddonId): number | null {
   }
 }
 
+// ---- Cabin / pollen filter pricing ----
+// Supplied INC VAT (part + €20 fitting). The F-series has too many variants to quote
+// up front (F1x vs F3x, charcoal vs non-charcoal) → price on application.
+// The G-series (G30) uses a fixed standard (non-charcoal) price.
+const CABIN_FILTER_G30_INC = 55; // standard non-charcoal Mann/Bosch, inc VAT (€35 part + €20 fitting)
+const CABIN_FILTER_G30_CHARCOAL_INC = 125; // activated-charcoal Mann, inc VAT (€105 part + €20 fitting)
+
+/**
+ * Cabin / pollen filter price (ex VAT) for an engine. null = price on application (F-series).
+ * G-series offers a standard (non-charcoal) filter or an activated-charcoal Mann upgrade.
+ */
+export function cabinFilterTotal(engine: Engine, charcoal = false): number | null {
+  if (engine.chassis !== "G30") return null;
+  const inc = charcoal ? CABIN_FILTER_G30_CHARCOAL_INC : CABIN_FILTER_G30_INC;
+  return round2(inc / (1 + VAT_RATE));
+}
+
+/** The G30 standard cabin filter price (ex VAT), used as the reference figure for the package cards. */
+export function cabinFilterReference(): number {
+  return round2(CABIN_FILTER_G30_INC / (1 + VAT_RATE));
+}
+
 /** Full add-on price = fitting labour + part. null = on request. */
 export function addonTotal(engine: Engine, id: AddonId): number | null {
+  // Cabin filter is a bundled part+fitting price (G-series only), so it bypasses the labour/part split.
+  if (id === "cabin-filter") return cabinFilterTotal(engine);
   const l = addonLabour(engine, id);
   const p = addonPart(engine, id);
   if (l === null || p === null) return null;
@@ -327,4 +351,131 @@ export function addonLabel(engine: Engine, id: AddonId): string {
     case "cabin-filter":
       return "Cabin / pollen filter";
   }
+}
+
+// ---- Pre-built service packages ----
+// Shown as compact "rough starting price" cards on the Services page. They are
+// presets of the configurator, so their pricing always matches it (no drift).
+
+/** Reference vehicle for the "from" estimates: 520d (F10, N47) — the most common Irish BMW. */
+export const REFERENCE_ENGINE_ID = "f-n47";
+
+export interface ServicePackage {
+  id: "interim" | "major" | "premium" | "platinum";
+  name: string;
+  /** Oil preset id (see OIL_OPTIONS). */
+  oilId: string;
+  /** Included add-ons (filters / plugs). */
+  addonIds: AddonId[];
+  /** Included paid extras (see EXTRAS), e.g. diagnostics. */
+  extraIds: string[];
+  /** Short bullet list shown on the card. */
+  includes: string[];
+  popular?: boolean;
+}
+
+export const SERVICE_PACKAGES: ServicePackage[] = [
+  {
+    id: "interim",
+    name: "Interim",
+    oilId: "ll04",
+    addonIds: [],
+    extraIds: [],
+    includes: [
+      "Standard LL04 oil",
+      "Oil filter",
+      "Screen wash top-up",
+      "iDrive & AOS history update",
+    ],
+  },
+  {
+    id: "major",
+    name: "Major",
+    oilId: "ll04",
+    addonIds: ["air-filter", "fuel-filter"],
+    extraIds: [],
+    includes: [
+      "Standard LL04 oil",
+      "Oil, air & fuel filters",
+      "Vehicle health check",
+      "Walkaround video",
+      "Screen wash + history update",
+    ],
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    oilId: "toptec",
+    addonIds: ["air-filter", "fuel-filter"],
+    extraIds: [],
+    includes: [
+      "Premium TopTec 4200 oil",
+      "Oil, air & fuel filters",
+      "Vehicle health check",
+      "Walkaround video",
+      "iDrive & AOS history update",
+    ],
+    popular: true,
+  },
+  {
+    id: "platinum",
+    name: "Platinum",
+    oilId: "toptec",
+    addonIds: ["air-filter", "fuel-filter", "cabin-filter"],
+    extraIds: [],
+    includes: [
+      "Premium TopTec 4200 oil",
+      "Oil, air, fuel & cabin filters",
+      "Vehicle health check",
+      "Walkaround video",
+      "iDrive & AOS history update",
+    ],
+  },
+];
+
+export interface PackageEstimate {
+  /** Ex-VAT "from" subtotal. */
+  subtotal: number;
+  /** Inc-VAT total. */
+  total: number;
+  /** True if the package contains a price-on-application item (e.g. cabin filter). */
+  hasPoa: boolean;
+}
+
+/** "From" estimate for a package on a given engine — matches the configurator exactly. */
+export function packageEstimate(engine: Engine, pkg: ServicePackage): PackageEstimate {
+  // Base = labour + chosen oil + oil-filter part (same lines the configurator always includes).
+  let subtotal = baseLabour(engine) + oilCost(engine, pkg.oilId) + engine.oilFilter;
+  let hasPoa = false;
+
+  for (const id of pkg.addonIds) {
+    let t = addonTotal(engine, id);
+    // Cards reference the F-series 520d, which has no cabin price → use the G30 figure instead.
+    if (id === "cabin-filter" && t === null) t = cabinFilterReference();
+    if (t === null) hasPoa = true;
+    else subtotal += t;
+  }
+
+  for (const id of pkg.extraIds) {
+    const extra = EXTRAS.find((e) => e.id === id);
+    if (!extra) continue;
+    if (extra.price === null) hasPoa = true;
+    else subtotal += extra.price;
+  }
+
+  subtotal = round2(subtotal);
+  return { subtotal, total: round2(subtotal * (1 + VAT_RATE)), hasPoa };
+}
+
+/**
+ * Map a package's add-ons to those valid for a given engine.
+ * Petrol engines get spark plugs instead of a (diesel-only) fuel filter.
+ */
+export function packageAddonsForEngine(pkg: ServicePackage, engine: Engine): AddonId[] {
+  const ids: AddonId[] = [];
+  for (const id of pkg.addonIds) {
+    if (id === "fuel-filter" && engine.fuel === "petrol") ids.push("spark-plugs");
+    else ids.push(id);
+  }
+  return ids;
 }

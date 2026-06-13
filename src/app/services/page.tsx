@@ -1,12 +1,52 @@
 "use client";
 
-import { Wrench, Code, Gauge, Puzzle, CheckCircle, ArrowRight, HelpCircle } from "lucide-react";
+import {
+  Wrench,
+  Code,
+  Gauge,
+  Puzzle,
+  CheckCircle,
+  Check,
+  ArrowRight,
+  HelpCircle,
+  SlidersHorizontal,
+} from "lucide-react";
 import Link from "next/link";
 import ServicePackagePopup from "../components/ServicePackagePopup";
 import { useState } from "react";
+import {
+  SERVICE_PACKAGES,
+  packageEstimate,
+  getEngine,
+  REFERENCE_ENGINE_ID,
+} from "./service-config";
+
+const PKG_STYLES: Record<string, { card: string; icon: string; check: string }> = {
+  interim: {
+    card: "border-white/10 bg-zinc-900/50 hover:border-blue-500/40 hover:bg-zinc-900/70 hover:shadow-lg hover:shadow-blue-500/10",
+    icon: "bg-blue-500/15 text-blue-400",
+    check: "text-blue-400",
+  },
+  major: {
+    card: "border-white/10 bg-zinc-900/50 hover:border-purple-500/40 hover:bg-zinc-900/70 hover:shadow-lg hover:shadow-purple-500/10",
+    icon: "bg-purple-500/15 text-purple-400",
+    check: "text-purple-400",
+  },
+  premium: {
+    card: "border-red-500/30 bg-gradient-to-br from-red-600/10 via-purple-600/10 to-blue-600/10 hover:border-red-500/50 hover:shadow-lg hover:shadow-red-500/20",
+    icon: "bg-red-500/15 text-red-400",
+    check: "text-red-400",
+  },
+  platinum: {
+    card: "border-white/10 bg-zinc-900/50 hover:border-cyan-500/40 hover:bg-zinc-900/70 hover:shadow-lg hover:shadow-cyan-500/10",
+    icon: "bg-cyan-500/15 text-cyan-400",
+    check: "text-cyan-400",
+  },
+};
 
 export default function ServicesPage() {
   const [showPopup, setShowPopup] = useState(false);
+  const refEngine = getEngine(REFERENCE_ENGINE_ID);
 
   return (
     <div className="pt-20">
@@ -88,221 +128,108 @@ export default function ServicesPage() {
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-32 bg-blue-500/5 blur-3xl" />
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Service <span className="text-gradient">Packages</span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Transparent pricing for our BMW & MINI servicing packages. All prices include VAT.
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              A rough guide to where prices start. For exact, model-specific pricing, build your
+              service in the configurator. Prices shown exclude VAT.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-            {/* Package 1: Interim Service */}
-            <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-8 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/20 hover:bg-zinc-900/70 transition-all group">
-              <div className="inline-flex p-3 bg-blue-500/10 rounded-lg mb-4">
-                <Wrench className="text-blue-500" size={32} />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Interim Service</h3>
-              <div className="mb-6">
-                <p className="text-gray-400 text-sm mb-2">Starting from</p>
-                <p className="text-4xl font-bold text-white">€170</p>
-                <p className="text-gray-500 text-xs mt-1">*Based on 520D F10 model</p>
-              </div>
-              <ul className="space-y-2 mb-8">
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Standard LL04 spec oil</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Oil Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Screenwash top-up</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">iDrive & AOS service history update</span>
-                </li>
-              </ul>
-              <Link
-                href="/services/configure?package=interim"
-                className="block w-full px-6 py-3 bg-white/5 border border-white/20 text-white text-center font-semibold rounded-lg hover:bg-white/10 transition-all"
-              >
-                Configure &amp; Book
-              </Link>
+          {refEngine && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+              {SERVICE_PACKAGES.map((pkg) => {
+                const est = packageEstimate(refEngine, pkg);
+                const from = Math.round(est.subtotal / 5) * 5;
+                const styles = PKG_STYLES[pkg.id];
+                return (
+                  <Link
+                    key={pkg.id}
+                    href={`/services/configure?package=${pkg.id}`}
+                    className={`group relative flex flex-col rounded-xl border p-5 transition-all ${styles.card}`}
+                  >
+                    {pkg.popular && (
+                      <span className="absolute -top-2.5 right-3 rounded-full bg-red-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg shadow-red-500/30">
+                        Popular
+                      </span>
+                    )}
+                    <div className="mb-3 flex items-center gap-2">
+                      <span
+                        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${styles.icon}`}
+                      >
+                        <Wrench size={16} />
+                      </span>
+                      <h3 className="text-base font-bold text-white">{pkg.name}</h3>
+                    </div>
+                    <div className="mb-3">
+                      <p className="text-[11px] uppercase tracking-wide text-gray-500">From</p>
+                      <p className="text-2xl font-bold text-white">
+                        €{from}
+                        {est.hasPoa && (
+                          <span className="align-top text-base font-bold text-amber-300">+</span>
+                        )}
+                      </p>
+                      <p className="text-[10px] text-gray-500">ex VAT</p>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {pkg.includes.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5">
+                          <Check
+                            className={`mt-0.5 flex-shrink-0 ${styles.check}`}
+                            size={13}
+                            strokeWidth={3}
+                          />
+                          <span className="text-xs leading-snug text-gray-400">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <span className="mt-auto pt-4 inline-flex items-center gap-1 text-xs font-semibold text-gray-300 transition-colors group-hover:text-white">
+                      Build this
+                      <ArrowRight
+                        size={12}
+                        className="transition-transform group-hover:translate-x-0.5"
+                      />
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
+          )}
 
-            {/* Package 2: Major Service */}
-            <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-8 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 hover:bg-zinc-900/70 transition-all group">
-              <div className="inline-flex p-3 bg-purple-500/10 rounded-lg mb-4">
-                <Wrench className="text-purple-500" size={32} />
+          {/* Configure for your car CTA */}
+          <div className="mx-auto mt-8 max-w-5xl">
+            <div className="flex flex-col items-center gap-5 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-red-600/10 p-6 text-center md:flex-row md:gap-8 md:p-8 md:text-left">
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-red-600 shadow-lg shadow-blue-500/30">
+                <SlidersHorizontal className="text-white" size={26} />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Major Service</h3>
-              <div className="mb-6">
-                <p className="text-gray-400 text-sm mb-2">Starting from</p>
-                <p className="text-4xl font-bold text-white">€270</p>
-                <p className="text-gray-500 text-xs mt-1">*Based on 520D F10 model</p>
+              <div className="flex-1">
+                <h3 className="mb-1 text-xl md:text-2xl font-bold text-white">
+                  Configure for your car
+                </h3>
+                <p className="text-sm text-gray-300">
+                  The prices above are rough starting points. Pick your exact engine, oil and extras
+                  for accurate, model-specific pricing.
+                </p>
               </div>
-              <ul className="space-y-2 mb-8">
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Standard LL04 spec oil</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Oil Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Air Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Fuel Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Vehicle Health Check</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Screenwash top-up</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">iDrive & AOS service history update</span>
-                </li>
-              </ul>
               <Link
-                href="/services/configure?package=major"
-                className="block w-full px-6 py-3 bg-white/5 border border-white/20 text-white text-center font-semibold rounded-lg hover:bg-white/10 transition-all"
+                href="/services/configure"
+                className="group inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 px-7 py-4 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:opacity-90"
               >
-                Configure &amp; Book
-              </Link>
-            </div>
-
-            {/* Package 3: Premium Service */}
-            <div className="bg-gradient-to-br from-red-600/10 via-purple-600/10 to-blue-600/10 border border-blue-500/30 rounded-xl p-8 hover:border-red-500/50 hover:shadow-xl hover:shadow-red-500/30 hover:from-red-600/15 hover:via-purple-600/15 hover:to-blue-600/15 transition-all relative group">
-              <div className="absolute top-4 right-4 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
-                POPULAR
-              </div>
-              <div className="inline-flex p-3 bg-blue-500/10 rounded-lg mb-4">
-                <Wrench className="text-red-500" size={32} />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Premium Service</h3>
-              <div className="mb-6">
-                <p className="text-gray-400 text-sm mb-2">Starting from</p>
-                <p className="text-4xl font-bold text-white">€350</p>
-                <p className="text-gray-500 text-xs mt-1">*Based on 520D F10 model</p>
-              </div>
-              <ul className="space-y-2 mb-8">
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Premium Liqui Moly TopTec 4200 oil</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Oil Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Air Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Fuel Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Vehicle Health Check</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Diagnostic Scan</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Screenwash top-up</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-red-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">iDrive & AOS service history update</span>
-                </li>
-              </ul>
-              <Link
-                href="/services/configure?package=premium"
-                className="block w-full px-6 py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 text-white text-center font-semibold rounded-lg hover:opacity-90 transition-all shadow-lg shadow-blue-500/30"
-              >
-                Configure &amp; Book
-              </Link>
-            </div>
-
-            {/* Package 4: Platinum Service */}
-            <div className="bg-zinc-900/50 border border-white/10 rounded-xl p-8 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/20 hover:bg-zinc-900/70 transition-all group">
-              <div className="inline-flex p-3 bg-blue-500/10 rounded-lg mb-4">
-                <Wrench className="text-blue-500" size={32} />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Platinum Service</h3>
-              <div className="mb-6">
-                <p className="text-gray-400 text-sm mb-2">Starting from</p>
-                <p className="text-4xl font-bold text-white">€480</p>
-                <p className="text-gray-500 text-xs mt-1">*Based on 520D F10 model</p>
-              </div>
-              <ul className="space-y-2 mb-8">
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Premium Liqui Moly TopTec 4200 oil</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Oil Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Air Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Fuel Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Pollen Cabin Filter</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Vehicle Health Check</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Diagnostic Scan</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">Screenwash top-up</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <CheckCircle className="text-blue-500 flex-shrink-0 mt-0.5" size={16} />
-                  <span className="text-gray-400 text-sm">iDrive & AOS service history update</span>
-                </li>
-              </ul>
-              <Link
-                href="/services/configure?package=platinum"
-                className="block w-full px-6 py-3 bg-white/5 border border-white/20 text-white text-center font-semibold rounded-lg hover:bg-white/10 transition-all"
-              >
-                Configure &amp; Book
+                <span>Build your service</span>
+                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
           </div>
 
-          {/* Pricing Note */}
-          <div className="mt-12 text-center">
-            <p className="text-gray-400 text-sm max-w-3xl mx-auto mb-8">
-              * Prices are based on the BMW 520D F10 model and may vary depending on vehicle model, engine type, and oil capacity.
-              Later models such as the G30 are typically priced slightly higher. Contact us for a detailed quote tailored to your specific BMW or MINI. All services include quality guarantee and expert care.
+          {/* Pricing Note + Help */}
+          <div className="mt-10 text-center">
+            <p className="text-gray-500 text-sm max-w-3xl mx-auto mb-8">
+              Starting prices are a rough guide based on a 520d (F10, N47). Your exact price depends
+              on your model, engine and oil capacity — newer models such as the G30 are typically a
+              little higher, and some items (e.g. the cabin filter) are confirmed on booking. Use the
+              configurator above or contact us for a precise quote.
             </p>
 
             {/* Help Box */}

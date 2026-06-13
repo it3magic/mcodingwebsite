@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -21,12 +22,14 @@ import {
 } from "lucide-react";
 import {
   type Addon,
+  type AddonId,
   addonLabel,
   addonLabour,
   addonPart,
   addonTotal,
   baseLabour,
   baseLabourLabel,
+  cabinFilterTotal,
   DEFAULT_OIL_ID,
   ENGINES,
   type Extra,
@@ -38,6 +41,9 @@ import {
   getOil,
   OIL_OPTIONS,
   oilCost,
+  packageAddonsForEngine,
+  SERVICE_PACKAGES,
+  type ServicePackage,
   totalLabourMinutes,
   VAT_RATE,
   type Engine,
@@ -434,6 +440,17 @@ function EngineLookupModal({
 }
 
 export default function ConfigurePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-950 pt-20" />}>
+      <ConfigureConfigurator />
+    </Suspense>
+  );
+}
+
+function ConfigureConfigurator() {
+  const searchParams = useSearchParams();
+  const pendingPackageRef = useRef<ServicePackage | null>(null);
+  const [presetName, setPresetName] = useState<string | null>(null);
   const [engineId, setEngineId] = useState<string | null>(null);
   const [oilId, setOilId] = useState<string>(DEFAULT_OIL_ID);
   const [addons, setAddons] = useState<string[]>([]);
@@ -443,23 +460,55 @@ export default function ConfigurePage() {
   const [registration, setRegistration] = useState("");
   const [lookupOpen, setLookupOpen] = useState(false);
   const [genuineFilters, setGenuineFilters] = useState(false);
+  const [cabinCharcoal, setCabinCharcoal] = useState(false);
 
   const engine = getEngine(engineId);
 
-  // Reset every selection (oil, add-ons, extras, drivetrain, freebies) whenever the engine platform changes.
+  // Read a ?package= deep-link once and remember it; it's applied when an engine is chosen.
   useEffect(() => {
+    const pkgId = searchParams.get("package");
+    if (!pkgId) return;
+    const pkg = SERVICE_PACKAGES.find((p) => p.id === pkgId);
+    if (!pkg) return;
+    pendingPackageRef.current = pkg;
+    setPresetName(pkg.name);
+  }, [searchParams]);
+
+  // Reset every selection whenever the engine changes — or apply a pending package preset.
+  useEffect(() => {
+    const pending = pendingPackageRef.current;
+    const eng = getEngine(engineId);
+    if (eng && pending) {
+      pendingPackageRef.current = null;
+      setOilId(pending.oilId);
+      setAddons(packageAddonsForEngine(pending, eng));
+      setExtras([]);
+      setXdrive(false);
+      setFreebies(DEFAULT_FREEBIES);
+      setGenuineFilters(false);
+      setCabinCharcoal(false);
+      return;
+    }
     setOilId(DEFAULT_OIL_ID);
     setAddons([]);
     setExtras([]);
     setXdrive(false);
     setFreebies(DEFAULT_FREEBIES);
     setGenuineFilters(false);
+    setCabinCharcoal(false);
   }, [engineId]);
 
-  /** Genuine BMW filters are price-on-application, so air/fuel filters lose their estimate. */
-  const genuinePoaAddon = (id: string) => genuineFilters && (id === "air-filter" || id === "fuel-filter");
+  /** Genuine BMW filters are price-on-application, so air/fuel/cabin filters lose their estimate. */
+  const genuinePoaAddon = (id: string) =>
+    genuineFilters && (id === "air-filter" || id === "fuel-filter" || id === "cabin-filter");
 
   const addonOptions = engine ? getAddons(engine) : [];
+
+  /** Cabin-filter-aware total (standard vs activated charcoal on G-series). */
+  const addonTotalFor = (id: AddonId): number | null => {
+    if (!engine) return null;
+    return id === "cabin-filter" ? cabinFilterTotal(engine, cabinCharcoal) : addonTotal(engine, id);
+  };
 
   const toggle = (id: string, list: string[], set: (v: string[]) => void) =>
     set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
@@ -479,11 +528,16 @@ export default function ConfigurePage() {
   // ---- Line items ----
   const baseLines = engine ? buildBaseLines(engine, oilId, genuineFilters) : [];
   const addonLines: Line[] = engine
-    ? selectedAddonOpts.map((a) => ({
-        key: a.id,
-        label: addonLabel(engine, a.id),
-        price: genuinePoaAddon(a.id) ? null : addonTotal(engine, a.id),
-      }))
+    ? selectedAddonOpts.map((a) => {
+        const cabinG = a.id === "cabin-filter" && engine.chassis === "G30" && !genuinePoaAddon(a.id);
+        return {
+          key: a.id,
+          label: cabinG
+            ? `${addonLabel(engine, a.id)} (${cabinCharcoal ? "charcoal" : "standard"})`
+            : addonLabel(engine, a.id),
+          price: genuinePoaAddon(a.id) ? null : addonTotalFor(a.id),
+        };
+      })
     : [];
   const extraLines: Line[] = selectedExtras.map((e) => ({
     key: e.id,
@@ -522,16 +576,29 @@ export default function ConfigurePage() {
     selectedAddonOpts.forEach((a) => {
       const labour = addonLabour(engine, a.id);
       const part = addonPart(engine, a.id);
-      const genuinePoa = genuineFilters && (a.id === "air-filter" || a.id === "fuel-filter");
-      const tot = genuinePoa ? null : addonTotal(engine, a.id);
+      const isCabin = a.id === "cabin-filter";
+      const genuinePoa =
+        genuineFilters && (a.id === "air-filter" || a.id === "fuel-filter" || a.id === "cabin-filter");
+      const tot = genuinePoa
+        ? null
+        : isCabin
+          ? cabinFilterTotal(engine, cabinCharcoal)
+          : addonTotal(engine, a.id);
+      const baseLabel = addonLabel(engine, a.id);
+      const label =
+        isCabin && !genuinePoa && tot !== null
+          ? `${baseLabel} (${cabinCharcoal ? "activated charcoal, Mann" : "standard"})`
+          : baseLabel;
       if (genuinePoa) {
-        lines.push(`${addonLabel(engine, a.id)}: Genuine BMW — price on application`);
-      } else if (tot === null || labour === null || part === null) {
-        lines.push(`${addonLabel(engine, a.id)}: price on request`);
-      } else {
+        lines.push(`${label}: Genuine BMW — price on application`);
+      } else if (tot === null) {
+        lines.push(`${label}: price on request`);
+      } else if (labour !== null && part !== null) {
         lines.push(
-          `${addonLabel(engine, a.id)}: ${formatEur(labour)} labour + ${formatEur(part)} part = ${formatEur(tot)}`,
+          `${label}: ${formatEur(labour)} labour + ${formatEur(part)} part = ${formatEur(tot)}`,
         );
+      } else {
+        lines.push(`${label}: ${formatEur(tot)}`);
       }
     });
     selectedExtras.forEach((e) => {
@@ -555,7 +622,7 @@ export default function ConfigurePage() {
     params.set("total", formatEur(total));
     if (registration.trim()) params.set("registration", registration.trim());
     return `/contact?${params.toString()}`;
-  }, [engine, oilId, selectedAddonOpts, selectedExtras, subtotal, vat, total, labourMin, hasPoa, registration, qualifiesForVideo, freebies, genuineFilters]);
+  }, [engine, oilId, selectedAddonOpts, selectedExtras, subtotal, vat, total, labourMin, hasPoa, registration, qualifiesForVideo, freebies, genuineFilters, cabinCharcoal]);
 
   const renderEngineButton = (e: Engine) => {
     const active = engineId === e.id;
@@ -632,6 +699,15 @@ export default function ConfigurePage() {
               {/* Step 1: Engine */}
               <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6">
                 <StepBadge n={1} label="Select your engine" />
+                {presetName && !engine && (
+                  <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-blue-500/40 bg-blue-500/10 p-3.5">
+                    <Sparkles size={16} className="mt-0.5 flex-shrink-0 text-blue-300" />
+                    <p className="text-sm leading-relaxed text-blue-100/90">
+                      <span className="font-semibold text-blue-200">{presetName} package</span> selected —
+                      choose your engine below and we&apos;ll tick the matching oil &amp; filters for you.
+                    </p>
+                  </div>
+                )}
                 <p className="-mt-2 mb-5 text-xs leading-relaxed text-gray-500">
                   Tip: match your model badge and year to the engines below — e.g. a 2013
                   320d is an N47, a 2016 520d is a B47. Most Irish BMWs are the N47 or B47
@@ -842,17 +918,22 @@ export default function ConfigurePage() {
                     {/* Optional add-on checkboxes */}
                     {addonOptions.map((a: Addon) => {
                       const genuinePoa = genuinePoaAddon(a.id);
-                      const tot = genuinePoa ? null : addonTotal(engine, a.id);
+                      const tot = genuinePoa ? null : addonTotalFor(a.id);
                       const labour = addonLabour(engine, a.id);
                       const part = addonPart(engine, a.id);
                       const breakdown = genuinePoa
                         ? "Genuine BMW part — price on application"
-                        : labour !== null && part !== null
-                          ? `${formatEur(labour)} labour + ${formatEur(part)} part`
-                          : a.desc;
-                      return (
+                        : a.id === "cabin-filter"
+                          ? tot !== null
+                            ? cabinCharcoal
+                              ? "Activated charcoal — Mann"
+                              : "Standard non-charcoal — Mann or Bosch"
+                            : a.desc
+                          : labour !== null && part !== null
+                            ? `${formatEur(labour)} labour + ${formatEur(part)} part`
+                            : a.desc;
+                      const row = (
                         <ToggleRow
-                          key={a.id}
                           active={addons.includes(a.id)}
                           onClick={() => toggle(a.id, addons, setAddons)}
                           label={a.label}
@@ -862,6 +943,49 @@ export default function ConfigurePage() {
                           priceActive={addons.includes(a.id) && tot !== null}
                           priceLabel={tot === null ? "On request" : `+${formatEur(tot)}`}
                         />
+                      );
+                      const showCabinChoice =
+                        a.id === "cabin-filter" &&
+                        addons.includes("cabin-filter") &&
+                        !genuinePoa &&
+                        engine.chassis === "G30";
+                      if (!showCabinChoice) return <div key={a.id}>{row}</div>;
+                      return (
+                        <div key={a.id} className="space-y-2">
+                          {row}
+                          <div className="ml-10 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            {[
+                              { charcoal: false, name: "Standard", sub: "Mann or Bosch" },
+                              { charcoal: true, name: "Activated charcoal", sub: "Mann branded" },
+                            ].map((opt) => {
+                              const optPrice = cabinFilterTotal(engine, opt.charcoal);
+                              const selected = cabinCharcoal === opt.charcoal;
+                              return (
+                                <button
+                                  key={String(opt.charcoal)}
+                                  type="button"
+                                  onClick={() => setCabinCharcoal(opt.charcoal)}
+                                  className={`rounded-lg border p-2.5 text-left transition-all ${
+                                    selected
+                                      ? "border-blue-500/60 bg-blue-500/10"
+                                      : "border-white/10 bg-black/20 hover:border-white/25"
+                                  }`}
+                                >
+                                  <span className="flex items-center justify-between gap-2">
+                                    <span className="text-xs font-semibold text-white">{opt.name}</span>
+                                    {selected && (
+                                      <Check size={13} className="text-blue-300" strokeWidth={3} />
+                                    )}
+                                  </span>
+                                  <span className="mt-0.5 block text-[11px] text-gray-400">
+                                    {opt.sub}
+                                    {optPrice !== null && ` · +${formatEur(optPrice)}`}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                       );
                     })}
                     <p className="pt-1 text-xs text-gray-500">
