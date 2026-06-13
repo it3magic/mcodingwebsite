@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  ChevronDown,
+  Clock,
   Plus,
   Cog,
   Fuel,
@@ -17,6 +17,7 @@ import {
   Search,
   Sparkles,
   Wrench,
+  X,
 } from "lucide-react";
 import {
   type Addon,
@@ -30,29 +31,21 @@ import {
   ENGINES,
   type Extra,
   formatEur,
+  formatMinutes,
   getAddons,
   getEngine,
   getExtras,
   getOil,
   OIL_OPTIONS,
   oilCost,
+  totalLabourMinutes,
   VAT_RATE,
   type Engine,
 } from "../service-config";
+import { ENGINE_MODELS } from "../engine-lookup";
 
 const ENGINES_F = ENGINES.filter((e) => e.chassis === "F Series");
 const ENGINES_G30 = ENGINES.filter((e) => e.chassis === "G30");
-
-/** Compact "common model → engine" lookup for quick scanning at the top of Step 1. */
-const MODEL_LOOKUP: { models: string; years: string; engineId: string }[] = [
-  { models: "320d · 520d · 118d/120d · X1/X3 20d", years: "2010–2014", engineId: "f-n47" },
-  { models: "330d · 530d · 640d · 730d · 740d", years: "2008–2016", engineId: "f-n57" },
-  { models: "320d · 520d · 118d/120d", years: "2015–2019", engineId: "f-b47" },
-  { models: "520d · 320d (G20) · X3 20d", years: "2017 on", engineId: "g30-b47" },
-  { models: "530d · 540d · 640d · 730d · 740d", years: "2017 on", engineId: "g30-b57" },
-  { models: "520i · 530i · 530e · 740e · 330i", years: "2017 on", engineId: "g30-b48" },
-  { models: "540i · 545e · 745e · 340i · 740i", years: "2017 on", engineId: "g30-b58" },
-];
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -61,7 +54,7 @@ const DEFAULT_FREEBIES = ["screen-wash", "air-freshener"];
 type Line = { key: string; label: string; sub?: string; tip?: string | string[]; tipTitle?: string; price: number | null };
 
 /** Always-included base line items: labour + oil + oil filter (same for every engine). */
-function buildBaseLines(engine: Engine, oilId: string): Line[] {
+function buildBaseLines(engine: Engine, oilId: string, genuine: boolean): Line[] {
   const oil = getOil(oilId);
   return [
     {
@@ -79,13 +72,18 @@ function buildBaseLines(engine: Engine, oilId: string): Line[] {
     {
       key: "oil-filter",
       label: `Oil filter (${engine.code})`,
-      sub: "High-quality Bosch or Mann filter",
+      sub: genuine ? "Genuine BMW filter — price on application" : "High-quality Bosch or Mann filter",
       tipTitle: "About the oil filter",
-      tip: [
-        "Mann+Hummel (Mann-Filter) is an original-equipment (OE) supplier to BMW — many genuine BMW filters come off its production lines, so you get factory filtration quality. Bosch is a trusted premium-brand alternative built to the same specification.",
-        "The oil filter is replaced at every service. Our recommendation is a service every 15,000 km, so fresh oil and clean filtration are always protecting your engine.",
-      ],
-      price: engine.oilFilter,
+      tip: genuine
+        ? [
+            "Genuine BMW oil filters are supplied straight from BMW. Pricing varies by model, so we confirm the exact price on booking.",
+            "The oil filter is replaced at every service. Our recommendation is a service every 15,000 km, so fresh oil and clean filtration are always protecting your engine.",
+          ]
+        : [
+            "Mann+Hummel (Mann-Filter) is an original-equipment (OE) supplier to BMW — many genuine BMW filters come off its production lines, so you get factory filtration quality. Bosch is a trusted premium-brand alternative built to the same specification.",
+            "The oil filter is replaced at every service. Our recommendation is a service every 15,000 km, so fresh oil and clean filtration are always protecting your engine.",
+          ],
+      price: genuine ? null : engine.oilFilter,
     },
   ];
 }
@@ -298,6 +296,143 @@ function FreeRow({
   );
 }
 
+/** Full-screen popup listing every model that uses each configurator engine. */
+function EngineLookupModal({
+  open,
+  onClose,
+  onSelect,
+  currentId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSelect: (id: string) => void;
+  currentId: string | null;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  const groups: { title: string; engines: Engine[] }[] = [
+    { title: "F Series · 2010–2019", engines: ENGINES_F },
+    { title: "G Series · 2017 on", engines: ENGINES_G30 },
+  ];
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Engine lookup"
+      onClick={onClose}
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl border border-white/10 bg-zinc-900 shadow-2xl shadow-black/60 sm:max-h-[85vh] sm:rounded-2xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-white/10 bg-gradient-to-r from-blue-600/15 via-purple-600/15 to-red-600/15 px-5 py-4">
+          <div>
+            <h3 className="flex items-center gap-2 text-base font-bold text-white">
+              <Search size={16} className="text-blue-300" /> Engine Lookup
+            </h3>
+            <p className="mt-0.5 text-xs text-gray-400">
+              Find your model, then tap its engine to select it.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 text-gray-400 transition-colors hover:border-white/25 hover:text-white"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto px-5 py-4">
+          {groups.map((g) => (
+            <div key={g.title} className="mb-6 last:mb-0">
+              <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                {g.title}
+              </h4>
+              <div className="space-y-3">
+                {g.engines.map((eng) => {
+                  const info = ENGINE_MODELS[eng.id];
+                  if (!info) return null;
+                  const active = currentId === eng.id;
+                  return (
+                    <div
+                      key={eng.id}
+                      className={`overflow-hidden rounded-xl border ${
+                        active ? "border-blue-500/60 bg-blue-500/[0.07]" : "border-white/10 bg-black/20"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelect(eng.id);
+                          onClose();
+                        }}
+                        className="flex w-full items-center justify-between gap-3 border-b border-white/10 px-4 py-2.5 text-left transition-colors hover:bg-white/5"
+                      >
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="text-base font-bold text-white">{eng.code}</span>
+                          <FuelBadge fuel={eng.fuel} />
+                          <span className="text-xs text-gray-400">
+                            {info.spec} · {info.years}
+                          </span>
+                        </span>
+                        <span
+                          className={`flex-shrink-0 rounded-lg px-3 py-1 text-xs font-semibold ${
+                            active ? "bg-blue-500 text-white" : "border border-blue-500/40 text-blue-300"
+                          }`}
+                        >
+                          {active ? "Selected" : "Select"}
+                        </span>
+                      </button>
+                      <ul className="divide-y divide-white/5">
+                        {info.rows.map((m, i) => (
+                          <li
+                            key={i}
+                            className="flex flex-col gap-0.5 px-4 py-2 sm:flex-row sm:items-baseline sm:gap-3"
+                          >
+                            <span className="w-24 flex-shrink-0 text-xs font-semibold text-gray-300">
+                              {m.series}
+                            </span>
+                            <span className="text-xs leading-relaxed text-gray-400">{m.variants}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-white/10 bg-black/20 px-5 py-3">
+          <p className="text-center text-[11px] text-gray-500">
+            Don&apos;t see your car, or driving an M / M&nbsp;Performance model? Close this and use
+            &ldquo;Contact us for a quote&rdquo; — we service many more models.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ConfigurePage() {
   const [engineId, setEngineId] = useState<string | null>(null);
   const [oilId, setOilId] = useState<string>(DEFAULT_OIL_ID);
@@ -307,6 +442,7 @@ export default function ConfigurePage() {
   const [freebies, setFreebies] = useState<string[]>(DEFAULT_FREEBIES);
   const [registration, setRegistration] = useState("");
   const [lookupOpen, setLookupOpen] = useState(false);
+  const [genuineFilters, setGenuineFilters] = useState(false);
 
   const engine = getEngine(engineId);
 
@@ -317,7 +453,11 @@ export default function ConfigurePage() {
     setExtras([]);
     setXdrive(false);
     setFreebies(DEFAULT_FREEBIES);
+    setGenuineFilters(false);
   }, [engineId]);
+
+  /** Genuine BMW filters are price-on-application, so air/fuel filters lose their estimate. */
+  const genuinePoaAddon = (id: string) => genuineFilters && (id === "air-filter" || id === "fuel-filter");
 
   const addonOptions = engine ? getAddons(engine) : [];
 
@@ -337,12 +477,12 @@ export default function ConfigurePage() {
       : addons.includes("air-filter") && addons.includes("spark-plugs"));
 
   // ---- Line items ----
-  const baseLines = engine ? buildBaseLines(engine, oilId) : [];
+  const baseLines = engine ? buildBaseLines(engine, oilId, genuineFilters) : [];
   const addonLines: Line[] = engine
     ? selectedAddonOpts.map((a) => ({
         key: a.id,
         label: addonLabel(engine, a.id),
-        price: addonTotal(engine, a.id),
+        price: genuinePoaAddon(a.id) ? null : addonTotal(engine, a.id),
       }))
     : [];
   const extraLines: Line[] = selectedExtras.map((e) => ({
@@ -357,8 +497,12 @@ export default function ConfigurePage() {
     : 0;
   const vat = round2(subtotal * VAT_RATE);
   const total = round2(subtotal + vat);
+  const labourMin = engine ? totalLabourMinutes(addons, extras) : 0;
+  const labourLabel = formatMinutes(labourMin);
   const hasPoa =
-    addonLines.some((l) => l.price === null) || extraLines.some((l) => l.price === null);
+    baseLines.some((l) => l.price === null) ||
+    addonLines.some((l) => l.price === null) ||
+    extraLines.some((l) => l.price === null);
 
   const canContinue = !!engine;
 
@@ -371,12 +515,18 @@ export default function ConfigurePage() {
     lines.push(
       `Engine oil: ${oil.name} — ${engine.oilCapacity} L × ${formatEur(oil.pricePerL)} = ${formatEur(oilCost(engine, oilId))}`,
     );
-    lines.push(`Oil filter (${engine.code}): ${formatEur(engine.oilFilter)}`);
+    if (genuineFilters) lines.push("Filters: Genuine BMW requested (price on application)");
+    lines.push(
+      `Oil filter (${engine.code}): ${genuineFilters ? "Genuine BMW — price on application" : formatEur(engine.oilFilter)}`,
+    );
     selectedAddonOpts.forEach((a) => {
       const labour = addonLabour(engine, a.id);
       const part = addonPart(engine, a.id);
-      const tot = addonTotal(engine, a.id);
-      if (tot === null || labour === null || part === null) {
+      const genuinePoa = genuineFilters && (a.id === "air-filter" || a.id === "fuel-filter");
+      const tot = genuinePoa ? null : addonTotal(engine, a.id);
+      if (genuinePoa) {
+        lines.push(`${addonLabel(engine, a.id)}: Genuine BMW — price on application`);
+      } else if (tot === null || labour === null || part === null) {
         lines.push(`${addonLabel(engine, a.id)}: price on request`);
       } else {
         lines.push(
@@ -390,6 +540,7 @@ export default function ConfigurePage() {
     lines.push(`Subtotal (ex VAT): ${formatEur(subtotal)}`);
     lines.push(`VAT (13.5%): ${formatEur(vat)}`);
     lines.push(`Estimated total (inc VAT): ${formatEur(total)}`);
+    lines.push(`Estimated labour time: ~${formatMinutes(labourMin)}`);
     const freeLines: string[] = [];
     if (freebies.includes("screen-wash")) freeLines.push("Screen wash top-up");
     if (freebies.includes("air-freshener")) freeLines.push("Air freshener");
@@ -404,20 +555,30 @@ export default function ConfigurePage() {
     params.set("total", formatEur(total));
     if (registration.trim()) params.set("registration", registration.trim());
     return `/contact?${params.toString()}`;
-  }, [engine, oilId, selectedAddonOpts, selectedExtras, subtotal, vat, total, hasPoa, registration, qualifiesForVideo, freebies]);
+  }, [engine, oilId, selectedAddonOpts, selectedExtras, subtotal, vat, total, labourMin, hasPoa, registration, qualifiesForVideo, freebies, genuineFilters]);
 
   const renderEngineButton = (e: Engine) => {
     const active = engineId === e.id;
+    const isDiesel = e.fuel === "diesel";
+    // Subtle fuel-coded glow: sky/blue for diesel, amber for petrol.
+    const cls = active
+      ? isDiesel
+        ? "border-sky-500/60 bg-sky-500/10 shadow-[0_0_24px_-4px_rgba(56,189,248,0.55)]"
+        : "border-amber-500/60 bg-amber-500/10 shadow-[0_0_24px_-4px_rgba(245,158,11,0.55)]"
+      : isDiesel
+        ? "border-sky-500/20 bg-zinc-900/40 shadow-[0_0_18px_-9px_rgba(56,189,248,0.9)] hover:border-sky-500/45 hover:shadow-[0_0_22px_-6px_rgba(56,189,248,0.55)]"
+        : "border-amber-500/20 bg-zinc-900/40 shadow-[0_0_18px_-9px_rgba(245,158,11,0.9)] hover:border-amber-500/45 hover:shadow-[0_0_22px_-6px_rgba(245,158,11,0.55)]";
+    const checkCls = active
+      ? isDiesel
+        ? "border-sky-500 bg-sky-500 text-white"
+        : "border-amber-500 bg-amber-500 text-white"
+      : "border-white/20 text-transparent";
     return (
       <button
         key={e.id}
         type="button"
         onClick={() => setEngineId(e.id)}
-        className={`flex items-start justify-between gap-3 rounded-xl border p-4 text-left transition-all ${
-          active
-            ? "border-blue-500/60 bg-blue-500/10 shadow-lg shadow-blue-500/20"
-            : "border-white/10 bg-zinc-900/40 hover:border-white/25 hover:bg-zinc-900/70"
-        }`}
+        className={`flex items-start justify-between gap-3 rounded-xl border p-4 text-left transition-all ${cls}`}
       >
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -429,9 +590,7 @@ export default function ConfigurePage() {
           )}
         </div>
         <span
-          className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border transition-all ${
-            active ? "border-blue-500 bg-blue-500 text-white" : "border-white/20 text-transparent"
-          }`}
+          className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border transition-all ${checkCls}`}
         >
           <Check size={14} strokeWidth={3} />
         </span>
@@ -481,60 +640,26 @@ export default function ConfigurePage() {
                   is below.
                 </p>
 
-                {/* Quick lookup: common model → engine */}
-                <div className="mb-5 overflow-hidden rounded-xl border border-white/10 bg-black/20">
-                  <button
-                    type="button"
-                    onClick={() => setLookupOpen((o) => !o)}
-                    aria-expanded={lookupOpen}
-                    className={`flex w-full items-center justify-between gap-2 bg-white/[0.03] px-3 py-2 text-left transition-colors hover:bg-white/[0.06] ${
-                      lookupOpen ? "border-b border-white/10" : ""
-                    }`}
-                  >
-                    <span className="flex items-center gap-2 text-xs font-semibold text-gray-300">
-                      <Search size={13} className="text-blue-400" />
-                      Not sure? Find your engine by model
-                    </span>
-                    <ChevronDown
-                      size={15}
-                      className={`flex-shrink-0 text-gray-400 transition-transform ${lookupOpen ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {lookupOpen && (
-                  <div className="divide-y divide-white/5">
-                    {MODEL_LOOKUP.map((row) => {
-                      const eng = getEngine(row.engineId);
-                      if (!eng) return null;
-                      const active = engineId === row.engineId;
-                      return (
-                        <button
-                          key={row.engineId}
-                          type="button"
-                          onClick={() => setEngineId(row.engineId)}
-                          className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
-                            active ? "bg-blue-500/15" : "hover:bg-white/5"
-                          }`}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs leading-snug text-gray-200">{row.models}</p>
-                            <p className="text-[10px] text-gray-500">{row.years}</p>
-                          </div>
-                          <span className="flex flex-shrink-0 items-center gap-1.5">
-                            <span
-                              className={`text-sm font-bold ${active ? "text-blue-300" : "text-white"}`}
-                            >
-                              {eng.code}
-                            </span>
-                            <span className="rounded border border-white/15 px-1 py-0.5 text-[9px] font-semibold uppercase text-gray-400">
-                              {eng.chassis === "G30" ? "G" : "F"}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  )}
-                </div>
+                {/* Engine lookup popup */}
+                <button
+                  type="button"
+                  onClick={() => setLookupOpen(true)}
+                  className="mb-5 flex w-full items-center justify-between gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-left transition-colors hover:border-white/20 hover:bg-white/5"
+                >
+                  <span className="flex items-center gap-2 text-xs font-semibold text-gray-300">
+                    <Search size={13} className="text-blue-400" />
+                    Not sure? Look up your engine by model
+                  </span>
+                  <span className="flex-shrink-0 rounded-lg border border-blue-500/40 px-2.5 py-1 text-[11px] font-semibold text-blue-300">
+                    Open lookup
+                  </span>
+                </button>
+                <EngineLookupModal
+                  open={lookupOpen}
+                  onClose={() => setLookupOpen(false)}
+                  onSelect={setEngineId}
+                  currentId={engineId}
+                />
 
                 <div className="space-y-5">
                   <div>
@@ -656,6 +781,33 @@ export default function ConfigurePage() {
                   <p className="text-sm text-gray-500">Select an engine above to build your service.</p>
                 ) : (
                   <div className="space-y-3">
+                    {/* Genuine BMW filters toggle */}
+                    <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-500/30 bg-amber-500/[0.06] p-4">
+                      <div>
+                        <p className="text-sm font-semibold text-white">Genuine BMW filters</p>
+                        <p className="mt-0.5 text-xs text-gray-400">
+                          Swap the oil, air, fuel &amp; cabin filters for genuine BMW parts — priced on
+                          application.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={genuineFilters}
+                        aria-label="Use genuine BMW filters"
+                        onClick={() => setGenuineFilters((v) => !v)}
+                        className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${
+                          genuineFilters ? "bg-amber-500" : "bg-white/15"
+                        }`}
+                      >
+                        <span
+                          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                            genuineFilters ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
                     {/* Locked base lines */}
                     {baseLines.map((l) => (
                       <div
@@ -689,11 +841,13 @@ export default function ConfigurePage() {
 
                     {/* Optional add-on checkboxes */}
                     {addonOptions.map((a: Addon) => {
-                      const tot = addonTotal(engine, a.id);
+                      const genuinePoa = genuinePoaAddon(a.id);
+                      const tot = genuinePoa ? null : addonTotal(engine, a.id);
                       const labour = addonLabour(engine, a.id);
                       const part = addonPart(engine, a.id);
-                      const breakdown =
-                        labour !== null && part !== null
+                      const breakdown = genuinePoa
+                        ? "Genuine BMW part — price on application"
+                        : labour !== null && part !== null
                           ? `${formatEur(labour)} labour + ${formatEur(part)} part`
                           : a.desc;
                       return (
@@ -747,8 +901,8 @@ export default function ConfigurePage() {
                         }`}
                       >
                         <span
-                          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                            xdrive ? "translate-x-[22px]" : "translate-x-0.5"
+                          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                            xdrive ? "translate-x-5" : "translate-x-0"
                           }`}
                         />
                       </button>
@@ -888,7 +1042,23 @@ export default function ConfigurePage() {
                         </div>
                         <div className="flex items-center justify-between border-t border-white/10 pt-4">
                           <span className="font-semibold text-white">Total (inc VAT)</span>
-                          <span className="text-2xl font-bold text-white">{formatEur(total)}</span>
+                          <span className="text-2xl font-bold text-white">
+                            {formatEur(total)}
+                            {hasPoa && (
+                              <span
+                                className="ml-0.5 align-top text-base font-bold text-amber-300"
+                                title="Some items are priced on application — final price will be higher"
+                              >
+                                +
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 pt-1 text-xs text-gray-400">
+                          <span className="flex items-center gap-1.5">
+                            <Clock size={13} className="text-gray-500" /> Est. labour time
+                          </span>
+                          <span className="font-semibold text-gray-300">~{labourLabel}</span>
                         </div>
                       </>
                     ) : (
@@ -932,7 +1102,11 @@ export default function ConfigurePage() {
                     {hasPoa && (
                       <div className="flex items-start gap-2 pt-1 text-xs text-amber-300/80">
                         <Info size={14} className="mt-0.5 flex-shrink-0" />
-                        <span>Items marked "On request" aren't in the total — we'll confirm their price on booking.</span>
+                        <span>
+                          The <span className="font-bold text-amber-300">+</span> means some items
+                          (e.g. genuine filters, cabin filter, wipers) are priced on application —
+                          your final price will be higher once those are confirmed.
+                        </span>
                       </div>
                     )}
 
