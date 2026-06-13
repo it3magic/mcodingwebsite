@@ -50,8 +50,8 @@ const MODEL_LOOKUP: { models: string; years: string; engineId: string }[] = [
   { models: "320d · 520d · 118d/120d", years: "2015–2019", engineId: "f-b47" },
   { models: "520d · 320d (G20) · X3 20d", years: "2017 on", engineId: "g30-b47" },
   { models: "530d · 540d · 640d · 730d · 740d", years: "2017 on", engineId: "g30-b57" },
-  { models: "520i · 530i · 530e · 320i/330i", years: "2017 on", engineId: "g30-b48" },
-  { models: "540i · 340i · M340i · 740i", years: "2017 on", engineId: "g30-b58" },
+  { models: "520i · 530i · 530e · 740e · 330i", years: "2017 on", engineId: "g30-b48" },
+  { models: "540i · 545e · 745e · 340i · 740i", years: "2017 on", engineId: "g30-b58" },
 ];
 
 const round2 = (n: number) => Math.round(n * 100) / 100;

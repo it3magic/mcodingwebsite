@@ -40,8 +40,8 @@ export const ENGINES: Engine[] = [
   // ---- G30 ----
   { id: "g30-b47", code: "B47", chassis: "G30", fuel: "diesel", oilCapacity: 5.25, oilFilter: 18.8, airFilter: 54.54, fuelFilter: 48.96, desc: "2.0 diesel, newest shape (2017 on). The 520d (G30) — same engine also in the 320d (G20) and X3 20d." },
   { id: "g30-b57", code: "B57", chassis: "G30", fuel: "diesel", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, fuelFilter: 48.96, desc: "3.0 straight-six diesel, 2017 on. The 530d/540d (G30) — also 330d (G20), 640d (G32), 730d/740d (G11/G12) and X3/X5 30d." },
-  { id: "g30-b48", code: "B48", chassis: "G30", fuel: "petrol", oilCapacity: 5.2, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 4, desc: "2.0 turbo petrol, 2017 on. The 520i/530i and 530e plug-in (G30) — also 320i/330i (G20) and X1/X3 20i/30i." },
-  { id: "g30-b58", code: "B58", chassis: "G30", fuel: "petrol", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 6, desc: "3.0 straight-six turbo petrol, 2017 on. The 540i (G30) — also 340i/M340i (G20), 740i (G11) and X3/X4 M40i." },
+  { id: "g30-b48", code: "B48", chassis: "G30", fuel: "petrol", oilCapacity: 5.2, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 4, desc: "2.0 turbo petrol & plug-in hybrid, 2017 on. The 520i/530i (G30), 530e & 740e plug-in hybrids — also 320i/330i (G20) and X1/X3 20i/30i." },
+  { id: "g30-b58", code: "B58", chassis: "G30", fuel: "petrol", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 6, desc: "3.0 straight-six turbo petrol & plug-in hybrid, 2017 on. The 540i (G30), 545e & 745e plug-in hybrids — also 340i/M340i (G20), 740i (G11) and X3/X4 M40i." },
 ];
 
 // ---- Engine oil options (ex VAT, per litre) ----
