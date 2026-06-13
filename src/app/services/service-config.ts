@@ -35,11 +35,11 @@ export interface Engine {
 export const ENGINES: Engine[] = [
   // ---- F Series (diesel) ----
   { id: "f-n47", code: "N47", chassis: "F Series", fuel: "diesel", oilCapacity: 5.2, oilFilter: 16.8, airFilter: 46.27, fuelFilter: 48.11, desc: "2.0 diesel, 2007–2015 — Ireland's most common diesel. The 320d (E90/F30), 520d (F10), 116d/118d/120d (F20) and X1/X3 18d/20d." },
-  { id: "f-n57", code: "N57", chassis: "F Series", fuel: "diesel", oilCapacity: 6.5, oilFilter: 16.8, airFilter: 43.26, fuelFilter: 48.11, desc: "3.0 straight-six diesel, 2008–2016 — the bigger diesel. The 530d/535d (F10), 330d/335d (E90/F30) and X3/X5 30d & 40d." },
+  { id: "f-n57", code: "N57", chassis: "F Series", fuel: "diesel", oilCapacity: 6.5, oilFilter: 16.8, airFilter: 43.26, fuelFilter: 48.11, desc: "3.0 straight-six diesel, 2008–2016. The 530d/535d (F10), 330d/335d (F30), 640d (F06/F12/F13), 730d/740d (F01) and X3/X5 30d/40d." },
   { id: "f-b47", code: "B47", chassis: "F Series", fuel: "diesel", oilCapacity: 5.25, oilFilter: 18.8, airFilter: 35.19, fuelFilter: 48.11, desc: "2.0 diesel, 2015–2019 facelift — replaced the N47. The 320d (F30 LCI), 520d (F10 LCI), 118d/120d (F20 LCI) and X1/X3 20d." },
   // ---- G30 ----
   { id: "g30-b47", code: "B47", chassis: "G30", fuel: "diesel", oilCapacity: 5.25, oilFilter: 18.8, airFilter: 54.54, fuelFilter: 48.96, desc: "2.0 diesel, newest shape (2017 on). The 520d (G30) — same engine also in the 320d (G20) and X3 20d." },
-  { id: "g30-b57", code: "B57", chassis: "G30", fuel: "diesel", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, fuelFilter: 48.96, desc: "3.0 straight-six diesel, 2017 on. The 530d/540d (G30) — also the 330d (G20), 730d (G11) and X3/X5 30d." },
+  { id: "g30-b57", code: "B57", chassis: "G30", fuel: "diesel", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, fuelFilter: 48.96, desc: "3.0 straight-six diesel, 2017 on. The 530d/540d (G30) — also 330d (G20), 640d (G32), 730d/740d (G11/G12) and X3/X5 30d." },
   { id: "g30-b48", code: "B48", chassis: "G30", fuel: "petrol", oilCapacity: 5.2, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 4, desc: "2.0 turbo petrol, 2017 on. The 520i/530i and 530e plug-in (G30) — also 320i/330i (G20) and X1/X3 20i/30i." },
   { id: "g30-b58", code: "B58", chassis: "G30", fuel: "petrol", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 6, desc: "3.0 straight-six turbo petrol, 2017 on. The 540i (G30) — also 340i/M340i (G20), 740i (G11) and X3/X4 M40i." },
 ];

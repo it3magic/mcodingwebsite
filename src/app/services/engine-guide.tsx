@@ -66,8 +66,8 @@ export function EngineHelpTooltip() {
             (2.0&nbsp;diesel).
           </p>
           <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-            <EngineGroup title="F Series (2010–2019)" list={F_ENGINES} />
-            <EngineGroup title="G30 (2017 on)" list={G_ENGINES} />
+            <EngineGroup title="F Series" list={F_ENGINES} />
+            <EngineGroup title="G Series" list={G_ENGINES} />
           </div>
         </div>
       )}

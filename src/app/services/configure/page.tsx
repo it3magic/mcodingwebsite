@@ -46,10 +46,10 @@ const ENGINES_G30 = ENGINES.filter((e) => e.chassis === "G30");
 /** Compact "common model → engine" lookup for quick scanning at the top of Step 1. */
 const MODEL_LOOKUP: { models: string; years: string; engineId: string }[] = [
   { models: "320d · 520d · 118d/120d · X1/X3 20d", years: "2010–2014", engineId: "f-n47" },
-  { models: "330d · 530d · 535d · X3/X5 30d/40d", years: "2008–2016", engineId: "f-n57" },
+  { models: "330d · 530d · 640d · 730d · 740d", years: "2008–2016", engineId: "f-n57" },
   { models: "320d · 520d · 118d/120d", years: "2015–2019", engineId: "f-b47" },
   { models: "520d · 320d (G20) · X3 20d", years: "2017 on", engineId: "g30-b47" },
-  { models: "530d · 540d · 330d · 730d", years: "2017 on", engineId: "g30-b57" },
+  { models: "530d · 540d · 640d · 730d · 740d", years: "2017 on", engineId: "g30-b57" },
   { models: "520i · 530i · 530e · 320i/330i", years: "2017 on", engineId: "g30-b48" },
   { models: "540i · 340i · M340i · 740i", years: "2017 on", engineId: "g30-b58" },
 ];
@@ -538,16 +538,16 @@ export default function ConfigurePage() {
 
                 <div className="space-y-5">
                   <div>
-                    <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
-                      <Cog size={16} className="text-blue-400" /> F Series (2010–2019)
+                    <div className="mb-3 flex items-center gap-2 text-lg font-bold text-white">
+                      <Cog size={18} className="text-blue-400" /> F Series
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {ENGINES_F.map(renderEngineButton)}
                     </div>
                   </div>
                   <div>
-                    <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-300">
-                      <Cog size={16} className="text-purple-400" /> G30 (2017 on)
+                    <div className="mb-3 flex items-center gap-2 text-lg font-bold text-white">
+                      <Cog size={18} className="text-purple-400" /> G Series
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {ENGINES_G30.map(renderEngineButton)}
