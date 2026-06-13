@@ -41,7 +41,7 @@ export const ENGINES: Engine[] = [
   { id: "g30-b47", code: "B47", chassis: "G30", fuel: "diesel", oilCapacity: 5.25, oilFilter: 18.8, airFilter: 54.54, fuelFilter: 48.96, desc: "2.0 diesel, newest shape (2017 on). The 520d (G30) — same engine also in the 320d (G20) and X3 20d." },
   { id: "g30-b57", code: "B57", chassis: "G30", fuel: "diesel", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, fuelFilter: 48.96, desc: "3.0 straight-six diesel, 2017 on. The 530d/540d (G30) — also 330d (G20), 640d (G32), 730d/740d (G11/G12) and X3/X5 30d." },
   { id: "g30-b48", code: "B48", chassis: "G30", fuel: "petrol", oilCapacity: 5.2, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 4, desc: "2.0 turbo petrol & plug-in hybrid, 2017 on. The 520i/530i (G30), 530e & 740e plug-in hybrids — also 320i/330i (G20) and X1/X3 20i/30i." },
-  { id: "g30-b58", code: "B58", chassis: "G30", fuel: "petrol", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 6, desc: "3.0 straight-six turbo petrol & plug-in hybrid, 2017 on. The 540i (G30), 545e & 745e plug-in hybrids — also 340i/M340i (G20), 740i (G11) and X3/X4 M40i." },
+  { id: "g30-b58", code: "B58", chassis: "G30", fuel: "petrol", oilCapacity: 6.5, oilFilter: 18.8, airFilter: 54.54, sparkPlugCount: 6, desc: "3.0 straight-six turbo petrol & plug-in hybrid, 2017 on. The 540i (G30), 545e & 745e plug-in hybrids — also 340i (F30 LCI), 740i (G11) and X5/X6 40i." },
 ];
 
 // ---- Engine oil options (ex VAT, per litre) ----
@@ -190,6 +190,51 @@ export const EXTRAS: Extra[] = [
     ] },
   { id: "wipers", name: "Windscreen Wipers", price: null, note: "Price varies by model" },
 ];
+
+// ---- Rough workshop time approximation (minutes) ----
+/** Base oil & filter service time. */
+export const BASE_LABOUR_MINUTES = 60;
+
+/** Added workshop time (minutes) per add-on / extra id. Unlisted items add no time. */
+export const LABOUR_MINUTES: Record<string, number> = {
+  // add-ons
+  "air-filter": 10,
+  "fuel-filter": 20,
+  "spark-plugs": 30,
+  "cabin-filter": 10,
+  // extras
+  "engine-flush": 10,
+  "brake-fluid": 20,
+  "rear-diff": 15,
+  diagnostics: 15,
+  "battery-test": 10,
+  "transfer-box": 30,
+  "front-diff": 20,
+};
+
+/**
+ * Total approximate workshop time (minutes).
+ * Transfer box + front differential are serviced together, so the front diff
+ * adds no extra time when the transfer box is already selected.
+ */
+export function totalLabourMinutes(addonIds: string[], extraIds: string[]): number {
+  let total = BASE_LABOUR_MINUTES;
+  for (const id of addonIds) total += LABOUR_MINUTES[id] ?? 0;
+  for (const id of extraIds) {
+    if (id === "front-diff" && extraIds.includes("transfer-box")) continue;
+    total += LABOUR_MINUTES[id] ?? 0;
+  }
+  return total;
+}
+
+/** Format minutes as e.g. "1 hr 30 min". */
+export function formatMinutes(total: number): string {
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h} hr${h > 1 ? "s" : ""}`;
+  return `${h} hr ${m} min`;
+}
 
 // ---- helpers ----
 
