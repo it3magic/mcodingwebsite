@@ -33,7 +33,7 @@ const tailightsPricing: Record<string, string> = {
 
 // Pricing map for Speed Limit Info - SLI based on Vehicle Type
 const sliPricing: Record<string, string> = {
-  "F/G series with Kafas camera": "€170",
+  "F/G series with Kafas camera": "€185",
   "F series without Kafas camera": "€200",
 };
 

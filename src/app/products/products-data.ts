@@ -344,7 +344,7 @@ Not sure which iDrive system you have? **[Check our iDrive identification guide]
     slug: "speed-limit-info-sli",
     name: "Speed Limit Info - SLI",
     category: "Coding",
-    price: "€170",
+    price: "€185",
     images: [
       "https://ugc.same-assets.com/oy5qytfEqI02HLppZ50Z55A4LbbzvU5I.jpeg",
       "https://ugc.same-assets.com/tdzh-TAygekFNuVQX4z-loX1DP_cqV1S.jpeg",
