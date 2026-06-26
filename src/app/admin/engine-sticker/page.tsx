@@ -122,19 +122,28 @@ export default function EngineStickerPage() {
     </div>
   );
 
-  // Big condensed section title with gradient underline
+  // Big condensed section title with gradient underline.
+  // NOTE: `lineHeight` is kept >= 1.15 and real `paddingBottom` reserves space
+  // below the glyphs so the underline never overlaps the text once rasterised
+  // by html2canvas (which renders Bebas Neue slightly lower than the browser).
   const StickerTitle = ({ overline, title, size = 52 }: { overline?: string; title: string; size?: number }) => (
     <div className="text-center">
       {overline && (
-        <div className="text-[10px] uppercase tracking-[0.35em] text-gray-500">{overline}</div>
+        <div className="mb-1 text-[10px] uppercase tracking-[0.35em] text-gray-500">{overline}</div>
       )}
       <div
         className="text-white"
-        style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: `${size}px`, lineHeight: 1, letterSpacing: "0.03em" }}
+        style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: `${size}px`,
+          lineHeight: 1.15,
+          letterSpacing: "0.03em",
+          paddingBottom: "12px",
+        }}
       >
         {title}
       </div>
-      <div className="mx-auto mt-2.5 h-1 w-24 rounded-full" style={{ background: GRADIENT }} />
+      <div className="mx-auto h-1 w-24 rounded-full" style={{ background: GRADIENT, marginTop: "2px" }} />
     </div>
   );
 
