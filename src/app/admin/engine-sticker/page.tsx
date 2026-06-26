@@ -173,23 +173,32 @@ export default function EngineStickerPage() {
     </div>
   );
 
-  // Checklist pill
+  // Checklist pill.
+  // NOTE: a fixed row height + matching 20px line-height on both the checkbox
+  // and the label keep them vertically aligned once rasterised by html2canvas
+  // (which otherwise places the text baseline lower than the browser does).
   const CheckItem = ({ checked, label }: { checked: boolean; label: string }) => (
     <div
-      className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 ${
+      className={`flex items-center gap-2.5 rounded-lg border px-3 ${
         checked ? "border-white/10 bg-white/[0.05]" : "border-white/5 bg-white/[0.02]"
       }`}
+      style={{ height: "38px" }}
     >
       <span
-        className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border"
+        className="flex flex-shrink-0 items-center justify-center rounded-md border"
         style={{
+          width: "20px",
+          height: "20px",
           borderColor: checked ? "transparent" : "rgba(255,255,255,0.25)",
           background: checked ? GRADIENT : "transparent",
         }}
       >
         {checked && <Check size={13} strokeWidth={3} color="white" style={{ display: "block" }} />}
       </span>
-      <span className={`text-[13px] font-medium tracking-wide ${checked ? "text-white" : "text-gray-400"}`}>
+      <span
+        className={`font-medium tracking-wide ${checked ? "text-white" : "text-gray-400"}`}
+        style={{ fontSize: "13px", lineHeight: "20px" }}
+      >
         {label}
       </span>
     </div>
