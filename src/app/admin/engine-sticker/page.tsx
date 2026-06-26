@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import html2canvas from "html2canvas";
 import { Download, Printer, Loader2, Check, Wrench, Settings, Cog } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 type StickerType = "engine" | "rebuild" | "service";
+
+const GRADIENT = "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444)";
 
 export default function EngineStickerPage() {
   // Sticker type selector
@@ -36,6 +38,11 @@ export default function EngineStickerPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const stickerRef = useRef<HTMLDivElement>(null);
 
+  const fmtDate = (value: string) =>
+    value
+      ? new Date(value).toLocaleDateString("en-IE", { day: "2-digit", month: "short", year: "numeric" })
+      : "—";
+
   const handlePrint = () => {
     window.print();
   };
@@ -45,6 +52,11 @@ export default function EngineStickerPage() {
 
     setIsGenerating(true);
     try {
+      // Make sure the custom fonts have loaded before capturing the canvas
+      if (typeof document !== "undefined" && document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+
       const canvas = await html2canvas(stickerRef.current, {
         backgroundColor: null,
         scale: 3,
@@ -66,39 +78,151 @@ export default function EngineStickerPage() {
     }
   };
 
-  // Checkbox component for stickers
-  const StickerCheckbox = ({ checked, label, large = false }: { checked: boolean; label: string; large?: boolean }) => {
-    return (
-      <div className="flex items-center gap-2">
+  /* ---------- Reusable sticker building blocks ---------- */
+
+  // Outer gradient-border shell + dark panel + vertical accent spine + watermark
+  const StickerShell = ({ children }: { children: ReactNode }) => (
+    <div
+      ref={stickerRef}
+      className="sticker-preview rounded-[18px] p-[3px] shadow-2xl"
+      style={{ width: "450px", height: "800px", background: GRADIENT }}
+    >
+      <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[15px] bg-gradient-to-br from-zinc-900 via-zinc-950 to-black">
+        {/* Vertical accent spine */}
+        <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-blue-500 via-purple-500 to-red-500" />
+        {/* Faint motorsport watermark */}
         <div
-          className={`${large ? 'w-6 h-6' : 'w-5 h-5'} rounded border-2 ${checked ? 'border-purple-500' : 'border-gray-600'}`}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            background: checked ? 'linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444)' : 'transparent',
-          }}
+          className="pointer-events-none absolute -right-10 bottom-16 select-none leading-none text-white/[0.035]"
+          style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "300px" }}
         >
-          {checked && (
-            <Check
-              size={large ? 16 : 14}
-              strokeWidth={3}
-              color="white"
-              style={{ display: 'block' }}
-            />
-          )}
+          M
         </div>
-        <span className={`text-gray-200 ${large ? 'text-sm font-semibold' : 'text-xs font-medium'} tracking-wide`}>{label}</span>
+        {children}
       </div>
-    );
-  };
+    </div>
+  );
+
+  // Brand header (wordmark + condensed tagline)
+  const StickerHeader = ({ maxWidth = 240 }: { maxWidth?: number }) => (
+    <div className="flex flex-col items-center">
+      <Image
+        src="/LogoFinal-01.png"
+        alt="M Coding Ireland"
+        width={400}
+        height={120}
+        className="h-auto"
+        style={{ width: "100%", maxWidth }}
+      />
+      <div
+        className="mt-1.5 text-gray-400"
+        style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "12px", letterSpacing: "0.42em" }}
+      >
+        BMW &amp; MINI SPECIALIST
+      </div>
+    </div>
+  );
+
+  // Big condensed section title with gradient underline
+  const StickerTitle = ({ overline, title, size = 52 }: { overline?: string; title: string; size?: number }) => (
+    <div className="text-center">
+      {overline && (
+        <div className="text-[10px] uppercase tracking-[0.35em] text-gray-500">{overline}</div>
+      )}
+      <div
+        className="text-white"
+        style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: `${size}px`, lineHeight: 1, letterSpacing: "0.03em" }}
+      >
+        {title}
+      </div>
+      <div className="mx-auto mt-2.5 h-1 w-24 rounded-full" style={{ background: GRADIENT }} />
+    </div>
+  );
+
+  // Small uppercase label with trailing hairline
+  const SectionLabel = ({ children }: { children: ReactNode }) => (
+    <div className="mb-3 flex items-center gap-3">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-gray-400 whitespace-nowrap">
+        {children}
+      </span>
+      <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
+    </div>
+  );
+
+  // Monospace data card (date / mileage)
+  const DataField = ({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) => (
+    <div
+      className={`rounded-lg border px-3 py-2.5 ${
+        accent ? "border-blue-500/30 bg-blue-500/[0.08]" : "border-white/10 bg-black/40"
+      }`}
+    >
+      <div className={`text-[8px] uppercase tracking-[0.2em] ${accent ? "text-blue-300" : "text-gray-500"}`}>
+        {label}
+      </div>
+      <div className="mt-0.5 text-white" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "14px", fontWeight: 600 }}>
+        {value}
+      </div>
+    </div>
+  );
+
+  // Checklist pill
+  const CheckItem = ({ checked, label }: { checked: boolean; label: string }) => (
+    <div
+      className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 ${
+        checked ? "border-white/10 bg-white/[0.05]" : "border-white/5 bg-white/[0.02]"
+      }`}
+    >
+      <span
+        className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border"
+        style={{
+          borderColor: checked ? "transparent" : "rgba(255,255,255,0.25)",
+          background: checked ? GRADIENT : "transparent",
+        }}
+      >
+        {checked && <Check size={13} strokeWidth={3} color="white" style={{ display: "block" }} />}
+      </span>
+      <span className={`text-[13px] font-medium tracking-wide ${checked ? "text-white" : "text-gray-400"}`}>
+        {label}
+      </span>
+    </div>
+  );
+
+  // Footer with QR + contact
+  const StickerFooter = ({
+    qrValue = "https://m-coding.ie",
+    ctaTitle,
+    ctaSub,
+  }: {
+    qrValue?: string;
+    ctaTitle: string;
+    ctaSub: string;
+  }) => (
+    <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+      <div className="flex items-center gap-2.5">
+        <div className="rounded-md bg-white p-1">
+          <QRCodeSVG value={qrValue} size={42} level="M" bgColor="#ffffff" fgColor="#000000" />
+        </div>
+        <div className="text-[9px] leading-tight text-gray-400">
+          <div className="font-semibold text-white">{ctaTitle}</div>
+          <div>{ctaSub}</div>
+        </div>
+      </div>
+      <div className="text-right text-[9px] leading-tight text-gray-500">
+        <div
+          className="text-gray-200"
+          style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "14px", letterSpacing: "0.08em" }}
+        >
+          m-coding.ie
+        </div>
+        <div>Ardfinnan, Co. Tipperary</div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-24 pb-12">
-      {/* Google Font for handwriting */}
+      {/* Google Fonts: condensed display + mono data + handwriting signature */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@600;700&family=JetBrains+Mono:wght@500;600;700&display=swap"
         rel="stylesheet"
       />
 
@@ -319,273 +443,131 @@ export default function EngineStickerPage() {
 
         {/* Sticker Preview */}
         <div className="flex justify-center">
-          {/* Engine Service Sticker - Landscape */}
+          {/* Engine Service Sticker - Portrait 9:16 */}
           {stickerType === "engine" && (
-            <div
-              ref={stickerRef}
-              className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black rounded-xl overflow-hidden shadow-2xl"
-              style={{
-                width: "520px",
-                border: "3px solid transparent",
-                borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
-              }}
-            >
-              <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
+            <StickerShell>
+              <div className="relative z-10 flex h-full flex-col px-7 py-7">
+                <StickerHeader maxWidth={240} />
 
-              <div className="p-5">
-                {/* Header - Big Logo */}
-                <div className="flex justify-center mb-2">
-                  <Image
-                    src="/LogoFinal-01.png"
-                    alt="M Coding Ireland"
-                    width={400}
-                    height={120}
-                    className="w-full max-w-[380px] h-auto"
-                  />
+                <div className="mt-7">
+                  <StickerTitle title="ENGINE SERVICE" size={50} />
                 </div>
 
-                {/* Assembled by text - Handwriting font */}
-                <div className="text-center mb-4">
-                  <p
-                    className="text-xl text-white"
-                    style={{ fontFamily: "'Dancing Script', cursive" }}
-                  >
-                    Assembled with pride by Maciej Cymerys
-                  </p>
-                </div>
-
-                {/* Divider */}
-                <div className="h-px bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-red-500/50 mb-4" />
-
-                {/* Content Row */}
-                <div className="flex gap-6">
-                  {/* Left Side - Checkboxes */}
-                  <div className="flex-1">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Work Completed</div>
-                    <div className="space-y-2">
-                      <StickerCheckbox checked={rodBearings} label="Rod Bearings" large />
-                      <StickerCheckbox checked={mainBearings} label="Main Bearings" large />
-                      <StickerCheckbox checked={timingChain} label="Timing Chain" large />
-                    </div>
-                  </div>
-
-                  {/* Vertical Divider */}
-                  <div className="w-px bg-gradient-to-b from-transparent via-gray-600 to-transparent" />
-
-                  {/* Right Side - Date and Mileage */}
-                  <div className="w-44">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Service Details</div>
-                    <div className="space-y-2">
-                      <div className="bg-black/50 rounded-lg p-3 border border-white/10">
-                        <div className="text-[9px] text-gray-500 uppercase tracking-wider">Date</div>
-                        <div className="text-white font-bold text-sm">
-                          {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__ / ___ / ____'}
-                        </div>
-                      </div>
-                      <div className="bg-black/50 rounded-lg p-3 border border-white/10">
-                        <div className="text-[9px] text-gray-500 uppercase tracking-wider">Mileage</div>
-                        <div className="text-white font-bold text-sm">
-                          {mileage ? `${mileage} km` : '________ km'}
-                        </div>
-                      </div>
-                    </div>
+                <div className="mt-6 text-center">
+                  <div className="text-[10px] uppercase tracking-[0.25em] text-gray-500">Assembled with pride by</div>
+                  <div className="mt-0.5 text-3xl text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                    Maciej Cymerys
                   </div>
                 </div>
 
-                {/* Footer */}
-                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[9px] text-gray-500">
-                  <span>BMW & MINI Specialist</span>
-                  <span className="text-gray-400 font-medium">www.m-coding.ie</span>
-                  <span>Ardfinnan, Co. Tipperary</span>
+                <div className="mt-8">
+                  <SectionLabel>Work Completed</SectionLabel>
+                  <div className="space-y-2.5">
+                    <CheckItem checked={rodBearings} label="Rod Bearings" />
+                    <CheckItem checked={mainBearings} label="Main Bearings" />
+                    <CheckItem checked={timingChain} label="Timing Chain" />
+                  </div>
+                </div>
+
+                <div className="mt-8">
+                  <SectionLabel>Service Details</SectionLabel>
+                  <div className="grid grid-cols-2 gap-3">
+                    <DataField label="Date" value={fmtDate(date)} />
+                    <DataField label="Mileage" value={mileage ? `${mileage} km` : "—"} />
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-6">
+                  <StickerFooter ctaTitle="Book a Service" ctaSub="Scan to enquire" />
                 </div>
               </div>
-
-              <div className="h-2 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
-            </div>
+            </StickerShell>
           )}
 
-          {/* Complete Engine Rebuild Sticker - Simplified with handwriting */}
+          {/* Complete Engine Rebuild Sticker - Portrait 9:16 (certificate style) */}
           {stickerType === "rebuild" && (
-            <div
-              ref={stickerRef}
-              className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black rounded-xl overflow-hidden shadow-2xl"
-              style={{
-                width: "520px",
-                border: "3px solid transparent",
-                borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
-              }}
-            >
-              <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
+            <StickerShell>
+              <div className="relative z-10 flex h-full flex-col px-7 py-7">
+                <StickerHeader maxWidth={240} />
 
-              <div className="p-6">
-                {/* Header - Big Logo */}
-                <div className="flex justify-center mb-4">
-                  <Image
-                    src="/LogoFinal-01.png"
-                    alt="M Coding Ireland"
-                    width={400}
-                    height={120}
-                    className="w-full max-w-[400px] h-auto"
-                  />
+                <div className="mt-6">
+                  <StickerTitle overline="Certificate of" title="ENGINE REBUILD" size={50} />
                 </div>
 
-                {/* Main Text - Handwriting font */}
-                <div className="text-center my-6">
-                  <p
-                    className="text-2xl text-white leading-relaxed"
-                    style={{ fontFamily: "'Dancing Script', cursive" }}
-                  >
-                    Engine rebuilt to M Coding standards
+                {/* Hero statement fills the tall middle */}
+                <div className="flex flex-1 flex-col items-center justify-center text-center">
+                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ background: GRADIENT }}>
+                      <Cog size={28} color="white" />
+                    </div>
+                  </div>
+                  <p className="text-[28px] leading-snug text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                    Rebuilt to M&nbsp;Coding standards
                   </p>
-                  <p
-                    className="text-2xl text-white mt-1"
-                    style={{ fontFamily: "'Dancing Script', cursive" }}
-                  >
+                  <p className="mt-1 text-[28px] text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
                     by Maciej Cymerys
                   </p>
                 </div>
 
-                {/* Date and Mileage - Smaller, subtle */}
-                <div className="flex justify-center gap-6 mt-4">
-                  <div className="text-center">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-wider">Date</div>
-                    <div className="text-white font-medium text-sm">
-                      {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__ / ___ / ____'}
-                    </div>
-                  </div>
-                  <div className="text-gray-600">•</div>
-                  <div className="text-center">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-wider">Mileage</div>
-                    <div className="text-white font-medium text-sm">
-                      {mileage ? `${mileage} km` : '________ km'}
-                    </div>
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <DataField label="Build Date" value={fmtDate(date)} />
+                  <DataField label="Mileage" value={mileage ? `${mileage} km` : "—"} />
                 </div>
 
-                {/* Footer */}
-                <div className="mt-6 pt-3 border-t border-white/10 flex items-center justify-between text-[9px] text-gray-500">
-                  <span>BMW & MINI Specialist</span>
-                  <span className="text-gray-400 font-medium">www.m-coding.ie</span>
-                  <span>Ardfinnan, Co. Tipperary</span>
+                <div className="mt-6">
+                  <StickerFooter ctaTitle="Our Workshop" ctaSub="Scan to view" />
                 </div>
               </div>
-
-              <div className="h-2 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
-            </div>
+            </StickerShell>
           )}
 
-          {/* Regular Service Sticker - Landscape */}
+          {/* Regular Service Sticker - Portrait 9:16 */}
           {stickerType === "service" && (
-            <div
-              ref={stickerRef}
-              className="sticker-preview bg-gradient-to-br from-zinc-900 via-zinc-950 to-black rounded-xl overflow-hidden shadow-2xl"
-              style={{
-                width: "520px",
-                border: "3px solid transparent",
-                borderImage: "linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444) 1",
-              }}
-            >
-              <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-red-500" />
+            <StickerShell>
+              <div className="relative z-10 flex h-full flex-col px-6 py-6">
+                <StickerHeader maxWidth={220} />
 
-              <div className="p-4">
-                {/* Header - Bigger Logo */}
-                <div className="flex justify-center mb-2">
-                  <Image
-                    src="/LogoFinal-01.png"
-                    alt="M Coding Ireland"
-                    width={320}
-                    height={100}
-                    className="w-full max-w-[300px] h-auto"
+                <div className="mt-5">
+                  <StickerTitle title="SERVICE RECORD" size={44} />
+                </div>
+
+                <div className="mt-6">
+                  <SectionLabel>Work Completed</SectionLabel>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <CheckItem checked={liquiMolyOil} label="Liqui Moly Oil" />
+                    <CheckItem checked={oilFilter} label="Oil Filter" />
+                    <CheckItem checked={airFilter} label="Air Filter" />
+                    <CheckItem checked={fuelFilter} label="Fuel Filter" />
+                    <CheckItem checked={cabinFilter} label="Cabin Filter" />
+                    <CheckItem checked={sparkPlugs} label="Spark Plugs" />
+                  </div>
+                </div>
+
+                <div className="mt-5">
+                  <SectionLabel>This Service</SectionLabel>
+                  <div className="grid grid-cols-2 gap-3">
+                    <DataField label="Date" value={fmtDate(date)} />
+                    <DataField label="Mileage" value={mileage ? `${mileage} km` : "—"} />
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <SectionLabel>Next Service Due</SectionLabel>
+                  <div className="grid grid-cols-2 gap-3">
+                    <DataField label="Date" value={fmtDate(nextServiceDate)} accent />
+                    <DataField label="Or At" value={nextServiceMileage ? `${nextServiceMileage} km` : "—"} accent />
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-5">
+                  <StickerFooter
+                    qrValue="https://m-coding.ie/services#pricing"
+                    ctaTitle="Book Next Service"
+                    ctaSub="Scan QR code"
                   />
                 </div>
-
-                {/* Title */}
-                <div className="text-center mb-3">
-                  <h2 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-red-400 uppercase tracking-wider">
-                    Service Record
-                  </h2>
-                </div>
-
-                {/* Divider */}
-                <div className="h-px bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-red-500/50 mb-3" />
-
-                {/* Content Row */}
-                <div className="flex gap-4">
-                  {/* Left Side - Checkboxes */}
-                  <div className="flex-1">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest mb-2">Work Completed</div>
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                      <StickerCheckbox checked={liquiMolyOil} label="Liqui Moly Oil" />
-                      <StickerCheckbox checked={oilFilter} label="Oil Filter" />
-                      <StickerCheckbox checked={airFilter} label="Air Filter" />
-                      <StickerCheckbox checked={fuelFilter} label="Fuel Filter" />
-                      <StickerCheckbox checked={cabinFilter} label="Cabin Filter" />
-                      <StickerCheckbox checked={sparkPlugs} label="Spark Plugs" />
-                    </div>
-                  </div>
-
-                  {/* Vertical Divider */}
-                  <div className="w-px bg-gradient-to-b from-transparent via-gray-600 to-transparent" />
-
-                  {/* Right Side - Dates */}
-                  <div className="w-48">
-                    <div className="grid grid-cols-2 gap-2 mb-2">
-                      <div className="bg-black/50 rounded p-2 border border-white/10">
-                        <div className="text-[8px] text-gray-500 uppercase">Date</div>
-                        <div className="text-white font-bold text-[11px]">
-                          {date ? new Date(date).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__/__/____'}
-                        </div>
-                      </div>
-                      <div className="bg-black/50 rounded p-2 border border-white/10">
-                        <div className="text-[8px] text-gray-500 uppercase">Mileage</div>
-                        <div className="text-white font-bold text-[11px]">
-                          {mileage ? `${mileage} km` : '______ km'}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-[8px] text-gray-500 uppercase text-center mb-1">Next Service</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-blue-900/30 rounded p-2 border border-blue-500/20">
-                        <div className="text-[8px] text-blue-400 uppercase">Date</div>
-                        <div className="text-white font-bold text-[11px]">
-                          {nextServiceDate ? new Date(nextServiceDate).toLocaleDateString('en-IE', { day: '2-digit', month: 'short', year: 'numeric' }) : '__/__/____'}
-                        </div>
-                      </div>
-                      <div className="bg-blue-900/30 rounded p-2 border border-blue-500/20">
-                        <div className="text-[8px] text-blue-400 uppercase">Or At</div>
-                        <div className="text-white font-bold text-[11px]">
-                          {nextServiceMileage ? `${nextServiceMileage} km` : '______ km'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* QR Code and Footer */}
-                <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-white p-1 rounded">
-                      <QRCodeSVG
-                        value="https://m-coding.ie/services#pricing"
-                        size={36}
-                        level="M"
-                        bgColor="white"
-                        fgColor="black"
-                      />
-                    </div>
-                    <div className="text-[8px] text-gray-400 leading-tight">
-                      <div className="font-semibold text-white">Book Next Service</div>
-                      <div>Scan QR code</div>
-                    </div>
-                  </div>
-                  <p className="text-[9px] text-gray-500">
-                    www.m-coding.ie • Ardfinnan, Co. Tipperary
-                  </p>
-                </div>
               </div>
-
-              <div className="h-2 bg-gradient-to-r from-red-500 via-purple-500 to-blue-500" />
-            </div>
+            </StickerShell>
           )}
         </div>
 
@@ -596,7 +578,7 @@ export default function EngineStickerPage() {
             <li>• <strong className="text-white">Download PNG:</strong> Saves a high-resolution image file</li>
             <li>• <strong className="text-white">Print:</strong> Opens print dialog for direct printing</li>
             <li>• Use waterproof/vinyl sticker paper for durability</li>
-            <li>• Recommended size: 130mm x 75mm (landscape)</li>
+            <li>• Recommended size: 75mm x 133mm (portrait, 9:16)</li>
             <li>• Apply to a clean, dry surface in the engine bay</li>
           </ul>
         </div>
