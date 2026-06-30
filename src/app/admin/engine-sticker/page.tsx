@@ -2,7 +2,7 @@
 
 import { useState, useRef, type ReactNode } from "react";
 import Image from "next/image";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import { Download, Printer, Loader2, Check, Wrench, Settings, Cog } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -52,23 +52,24 @@ export default function EngineStickerPage() {
 
     setIsGenerating(true);
     try {
-      // Make sure the custom fonts have loaded before capturing the canvas
+      // Wait for the custom fonts to load, then render the sticker to PNG with
+      // html-to-image. Unlike html2canvas, it uses the browser's own rendering
+      // engine, so the PNG matches the on-screen preview exactly.
       if (typeof document !== "undefined" && document.fonts?.ready) {
         await document.fonts.ready;
       }
 
-      const canvas = await html2canvas(stickerRef.current, {
-        backgroundColor: null,
-        scale: 3,
-        useCORS: true,
-        logging: false,
+      const dataUrl = await toPng(stickerRef.current, {
+        pixelRatio: 3,
+        cacheBust: true,
+        style: { boxShadow: "none" },
       });
 
       const link = document.createElement("a");
       const dateStr = date ? new Date(date).toISOString().split("T")[0] : "undated";
       const prefixMap = { engine: "engine-sticker", rebuild: "rebuild-sticker", service: "service-sticker" };
       link.download = `${prefixMap[stickerType]}-${dateStr}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
       link.click();
     } catch (error) {
       console.error("Error generating PNG:", error);
