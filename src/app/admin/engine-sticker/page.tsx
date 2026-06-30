@@ -85,15 +85,15 @@ export default function EngineStickerPage() {
     <div
       ref={stickerRef}
       className="sticker-preview rounded-[18px] p-[3px] shadow-2xl"
-      style={{ width: "450px", height: "800px", background: GRADIENT }}
+      style={{ width: "600px", height: "640px", background: GRADIENT }}
     >
       <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[15px] bg-gradient-to-br from-zinc-900 via-zinc-950 to-black">
         {/* Vertical accent spine */}
         <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-blue-500 via-purple-500 to-red-500" />
         {/* Faint motorsport watermark */}
         <div
-          className="pointer-events-none absolute -right-10 bottom-16 select-none leading-none text-white/[0.035]"
-          style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "300px" }}
+          className="pointer-events-none absolute -right-8 -bottom-6 select-none leading-none text-white/[0.035]"
+          style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "260px" }}
         >
           M
         </div>
@@ -197,7 +197,7 @@ export default function EngineStickerPage() {
       </span>
       <span
         className={`font-medium tracking-wide ${checked ? "text-white" : "text-gray-400"}`}
-        style={{ fontSize: "13px", lineHeight: "20px" }}
+        style={{ fontSize: "13px", lineHeight: 1 }}
       >
         {label}
       </span>
@@ -461,68 +461,70 @@ export default function EngineStickerPage() {
 
         {/* Sticker Preview */}
         <div className="flex justify-center">
-          {/* Engine Service Sticker - Portrait 9:16 */}
+          {/* Engine Service Sticker - Near-square 75 x 80 mm */}
           {stickerType === "engine" && (
             <StickerShell>
-              <div className="relative z-10 flex h-full flex-col px-7 py-7">
-                <StickerHeader maxWidth={240} />
+              <div className="relative z-10 flex h-full flex-col px-7 py-6">
+                <StickerHeader maxWidth={250} />
 
-                <div className="mt-7">
-                  <StickerTitle title="ENGINE SERVICE" size={50} />
+                <div className="mt-4">
+                  <StickerTitle title="ENGINE SERVICE" size={44} />
                 </div>
 
-                <div className="mt-6 text-center">
+                <div className="mt-3 text-center">
                   <div className="text-[10px] uppercase tracking-[0.25em] text-gray-500">Assembled with pride by</div>
-                  <div className="mt-0.5 text-3xl text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                  <div className="text-[26px] leading-tight text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
                     Maciej Cymerys
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <SectionLabel>Work Completed</SectionLabel>
-                  <div className="space-y-2.5">
-                    <CheckItem checked={rodBearings} label="Rod Bearings" />
-                    <CheckItem checked={mainBearings} label="Main Bearings" />
-                    <CheckItem checked={timingChain} label="Timing Chain" />
+                {/* Two-column content for the near-square format */}
+                <div className="mt-5 grid grid-cols-2 gap-5">
+                  <div>
+                    <SectionLabel>Work Completed</SectionLabel>
+                    <div className="space-y-2">
+                      <CheckItem checked={rodBearings} label="Rod Bearings" />
+                      <CheckItem checked={mainBearings} label="Main Bearings" />
+                      <CheckItem checked={timingChain} label="Timing Chain" />
+                    </div>
+                  </div>
+                  <div>
+                    <SectionLabel>Service Details</SectionLabel>
+                    <div className="space-y-2">
+                      <DataField label="Date" value={fmtDate(date)} />
+                      <DataField label="Mileage" value={mileage ? `${mileage} km` : "—"} />
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <SectionLabel>Service Details</SectionLabel>
-                  <div className="grid grid-cols-2 gap-3">
-                    <DataField label="Date" value={fmtDate(date)} />
-                    <DataField label="Mileage" value={mileage ? `${mileage} km` : "—"} />
-                  </div>
-                </div>
-
-                <div className="mt-auto pt-6">
+                <div className="mt-auto pt-5">
                   <StickerFooter ctaTitle="Book a Service" ctaSub="Scan to enquire" />
                 </div>
               </div>
             </StickerShell>
           )}
 
-          {/* Complete Engine Rebuild Sticker - Portrait 9:16 (certificate style) */}
+          {/* Complete Engine Rebuild Sticker - Near-square (certificate style) */}
           {stickerType === "rebuild" && (
             <StickerShell>
-              <div className="relative z-10 flex h-full flex-col px-7 py-7">
-                <StickerHeader maxWidth={240} />
+              <div className="relative z-10 flex h-full flex-col px-7 py-6">
+                <StickerHeader maxWidth={250} />
 
-                <div className="mt-6">
-                  <StickerTitle overline="Certificate of" title="ENGINE REBUILD" size={50} />
+                <div className="mt-4">
+                  <StickerTitle overline="Certificate of" title="ENGINE REBUILD" size={44} />
                 </div>
 
-                {/* Hero statement fills the tall middle */}
+                {/* Hero statement fills the centre */}
                 <div className="flex flex-1 flex-col items-center justify-center text-center">
-                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ background: GRADIENT }}>
-                      <Cog size={28} color="white" />
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: GRADIENT }}>
+                      <Cog size={24} color="white" />
                     </div>
                   </div>
-                  <p className="text-[28px] leading-snug text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                  <p className="text-[26px] leading-snug text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
                     Rebuilt to M&nbsp;Coding standards
                   </p>
-                  <p className="mt-1 text-[28px] text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                  <p className="mt-1 text-[26px] text-white" style={{ fontFamily: "'Dancing Script', cursive" }}>
                     by Maciej Cymerys
                   </p>
                 </div>
@@ -532,26 +534,26 @@ export default function EngineStickerPage() {
                   <DataField label="Mileage" value={mileage ? `${mileage} km` : "—"} />
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-5">
                   <StickerFooter ctaTitle="Our Workshop" ctaSub="Scan to view" />
                 </div>
               </div>
             </StickerShell>
           )}
 
-          {/* Regular Service Sticker - Portrait 9:16 */}
+          {/* Regular Service Sticker - Near-square */}
           {stickerType === "service" && (
             <StickerShell>
-              <div className="relative z-10 flex h-full flex-col px-6 py-6">
-                <StickerHeader maxWidth={220} />
+              <div className="relative z-10 flex h-full flex-col px-7 py-6">
+                <StickerHeader maxWidth={230} />
 
-                <div className="mt-5">
-                  <StickerTitle title="SERVICE RECORD" size={44} />
+                <div className="mt-4">
+                  <StickerTitle title="SERVICE RECORD" size={40} />
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-5">
                   <SectionLabel>Work Completed</SectionLabel>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-3 gap-2.5">
                     <CheckItem checked={liquiMolyOil} label="Liqui Moly Oil" />
                     <CheckItem checked={oilFilter} label="Oil Filter" />
                     <CheckItem checked={airFilter} label="Air Filter" />
@@ -561,19 +563,21 @@ export default function EngineStickerPage() {
                   </div>
                 </div>
 
-                <div className="mt-5">
-                  <SectionLabel>This Service</SectionLabel>
-                  <div className="grid grid-cols-2 gap-3">
-                    <DataField label="Date" value={fmtDate(date)} />
-                    <DataField label="Mileage" value={mileage ? `${mileage} km` : "—"} />
+                {/* This service + next service side by side */}
+                <div className="mt-5 grid grid-cols-2 gap-5">
+                  <div>
+                    <SectionLabel>This Service</SectionLabel>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <DataField label="Date" value={fmtDate(date)} />
+                      <DataField label="Mileage" value={mileage ? `${mileage} km` : "—"} />
+                    </div>
                   </div>
-                </div>
-
-                <div className="mt-4">
-                  <SectionLabel>Next Service Due</SectionLabel>
-                  <div className="grid grid-cols-2 gap-3">
-                    <DataField label="Date" value={fmtDate(nextServiceDate)} accent />
-                    <DataField label="Or At" value={nextServiceMileage ? `${nextServiceMileage} km` : "—"} accent />
+                  <div>
+                    <SectionLabel>Next Service Due</SectionLabel>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <DataField label="Date" value={fmtDate(nextServiceDate)} accent />
+                      <DataField label="Or At" value={nextServiceMileage ? `${nextServiceMileage} km` : "—"} accent />
+                    </div>
                   </div>
                 </div>
 
@@ -596,7 +600,7 @@ export default function EngineStickerPage() {
             <li>• <strong className="text-white">Download PNG:</strong> Saves a high-resolution image file</li>
             <li>• <strong className="text-white">Print:</strong> Opens print dialog for direct printing</li>
             <li>• Use waterproof/vinyl sticker paper for durability</li>
-            <li>• Recommended size: 75mm x 133mm (portrait, 9:16)</li>
+            <li>• Recommended size: 75mm (W) x 80mm (H) — near-square</li>
             <li>• Apply to a clean, dry surface in the engine bay</li>
           </ul>
         </div>
