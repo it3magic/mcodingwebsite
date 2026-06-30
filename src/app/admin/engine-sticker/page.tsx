@@ -182,7 +182,6 @@ export default function EngineStickerPage() {
       className={`flex items-center gap-2.5 rounded-lg border px-3 ${
         checked ? "border-white/10 bg-white/[0.05]" : "border-white/5 bg-white/[0.02]"
       }`}
-      style={{ height: "38px" }}
     >
       <span
         className="flex flex-shrink-0 items-center justify-center rounded-md border"
@@ -195,9 +194,12 @@ export default function EngineStickerPage() {
       >
         {checked && <Check size={13} strokeWidth={3} color="white" style={{ display: "block" }} />}
       </span>
+      {/* The label's line-height drives the row height so the text is centred
+          by single-line rendering (reliable in html2canvas) rather than by
+          flexbox align-items, which html2canvas centres inaccurately. */}
       <span
         className={`font-medium tracking-wide ${checked ? "text-white" : "text-gray-400"}`}
-        style={{ fontSize: "13px", lineHeight: 1 }}
+        style={{ fontSize: "13px", lineHeight: "34px" }}
       >
         {label}
       </span>
