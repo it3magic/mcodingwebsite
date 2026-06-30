@@ -176,16 +176,13 @@ const REG_LABELS = ["registration", "reg no", "reg.", "number plate", "plate", "
 const VEHICLE_LABELS = ["vehicle", "car model", "make/model", "model", "make", "car"];
 const MILEAGE_LABELS = ["mileage", "odometer", "kms"];
 
-export async function getInvoiceDraft(
-  id: string,
-): Promise<{ invoice: Record<string, unknown>; draft: ZohoInvoiceDraft }> {
-  const data = await zohoGet(`invoices/${encodeURIComponent(id)}`);
-  const inv = (data.invoice as Record<string, unknown>) || {};
+/** Pure mapping from a raw Zoho invoice (+ optional contact custom fields) to a draft. */
+function mapInvoiceToDraft(
+  inv: Record<string, unknown>,
+  contactCfs: CustomField[] = [],
+): ZohoInvoiceDraft {
   const symbol = String(inv.currency_symbol ?? "€");
-
   const invoiceCfs = (inv.custom_fields as CustomField[]) || [];
-  const customerId = String(inv.customer_id ?? "");
-  const contactCfs = customerId ? await fetchContactCustomFields(customerId) : [];
 
   const reference = String(inv.reference_number ?? "").trim();
   const customerName = String(inv.customer_name ?? "");
@@ -219,7 +216,10 @@ export async function getInvoiceDraft(
   const lineItems = (inv.line_items as CustomField[]) || [];
   const workCarriedOut = lineItems
     .map((li) => {
-      const name = String(li.name ?? li.description ?? "Item").trim();
+      // Fall back to the description when a line item has no name (|| not ??,
+      // so an empty-string name also falls through). Many Zoho invoices use
+      // description-only lines, which previously produced a stray leading " — ".
+      const name = String(li.name || li.description || "Item").trim();
       const qty = Number(li.quantity ?? 0);
       const qtyPart = qty > 1 ? ` x${qty}` : "";
       const description = String(li.description ?? "").trim();
@@ -230,10 +230,10 @@ export async function getInvoiceDraft(
     .join("\n");
 
   const total = inv.total;
-  const number = String(inv.invoice_number ?? id);
+  const number = String(inv.invoice_number ?? "");
   const status = String(inv.status ?? "");
 
-  const draft: ZohoInvoiceDraft = {
+  return {
     date: String(inv.date ?? ""),
     customerName,
     registration,
@@ -246,6 +246,105 @@ export async function getInvoiceDraft(
       (status ? ` (${status})` : "") +
       (reference ? ` · Ref: ${reference}` : ""),
   };
+}
 
+export async function getInvoiceDraft(
+  id: string,
+): Promise<{ invoice: Record<string, unknown>; draft: ZohoInvoiceDraft }> {
+  const data = await zohoGet(`invoices/${encodeURIComponent(id)}`);
+  const inv = (data.invoice as Record<string, unknown>) || {};
+  const customerId = String(inv.customer_id ?? "");
+  const contactCfs = customerId ? await fetchContactCustomFields(customerId) : [];
+  const draft = mapInvoiceToDraft(inv, contactCfs);
   return { invoice: inv, draft };
+}
+
+/**
+ * List every invoice within an optional [from, to] date range (yyyy-mm-dd),
+ * newest first. Results are paginated; because they're sorted descending we can
+ * stop as soon as we cross below `from`.
+ */
+export async function listInvoicesInRange(
+  from?: string,
+  to?: string,
+): Promise<ZohoInvoiceSummary[]> {
+  const results: ZohoInvoiceSummary[] = [];
+  const perPage = 200;
+  for (let page = 1; page <= 100; page++) {
+    const data = await zohoGet("invoices", {
+      sort_column: "date",
+      sort_order: "D",
+      per_page: perPage,
+      page,
+    });
+    const invoices = (data.invoices as Record<string, unknown>[]) || [];
+    let crossedBelowFrom = false;
+    for (const inv of invoices) {
+      const date = String(inv.date ?? "");
+      if (to && date && date > to) continue; // newer than the range
+      if (from && date && date < from) {
+        crossedBelowFrom = true;
+        continue; // older than the range
+      }
+      results.push({
+        id: String(inv.invoice_id ?? ""),
+        number: String(inv.invoice_number ?? ""),
+        date,
+        customerName: String(inv.customer_name ?? ""),
+        total: Number(inv.total ?? 0),
+        currencySymbol: String(inv.currency_symbol ?? "€"),
+        status: String(inv.status ?? ""),
+      });
+    }
+    const pc = (data.page_context as Record<string, unknown>) || {};
+    if (crossedBelowFrom || !pc.has_more_page || invoices.length === 0) break;
+  }
+  return results;
+}
+
+export interface ZohoDraftResult {
+  id: string;
+  number: string;
+  date: string;
+  draft: ZohoInvoiceDraft;
+}
+
+/**
+ * Fetch + map drafts for a batch of invoice ids. Contact custom-field lookups
+ * are cached per-customer for the batch to cut API calls, and per-invoice
+ * failures are collected rather than aborting the whole batch.
+ */
+export async function getInvoiceDraftsBatch(
+  ids: string[],
+): Promise<{ results: ZohoDraftResult[]; errors: { id: string; error: string }[] }> {
+  const results: ZohoDraftResult[] = [];
+  const errors: { id: string; error: string }[] = [];
+  const contactCache = new Map<string, CustomField[]>();
+
+  for (const id of ids) {
+    try {
+      const data = await zohoGet(`invoices/${encodeURIComponent(id)}`);
+      const inv = (data.invoice as Record<string, unknown>) || {};
+      const customerId = String(inv.customer_id ?? "");
+      let contactCfs: CustomField[] = [];
+      if (customerId) {
+        const cached = contactCache.get(customerId);
+        if (cached) {
+          contactCfs = cached;
+        } else {
+          contactCfs = await fetchContactCustomFields(customerId);
+          contactCache.set(customerId, contactCfs);
+        }
+      }
+      results.push({
+        id,
+        number: String(inv.invoice_number ?? id),
+        date: String(inv.date ?? ""),
+        draft: mapInvoiceToDraft(inv, contactCfs),
+      });
+    } catch (e) {
+      errors.push({ id, error: e instanceof Error ? e.message : "Failed to fetch invoice" });
+    }
+  }
+  return { results, errors };
 }
