@@ -13,6 +13,8 @@ export interface WorkRecord {
   workCarriedOut: string;
   cost: string;
   notes: string;
+  /** Set when the record was imported from a Zoho Books invoice (used to skip duplicates). */
+  zohoInvoiceId?: string;
   createdAt: string;
   updatedAt: string;
 }
