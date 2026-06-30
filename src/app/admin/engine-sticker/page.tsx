@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { toPng } from "html-to-image";
 import { Download, Printer, Loader2, Check, Wrench, Settings, Cog } from "lucide-react";
@@ -37,6 +37,21 @@ export default function EngineStickerPage() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const stickerRef = useRef<HTMLDivElement>(null);
+
+  // Pre-fill from a Work Record via ?type=&date=&mileage= (used by the
+  // "Create sticker" shortcut on the Work Records page).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get("type");
+    if (type === "engine" || type === "rebuild" || type === "service") {
+      setStickerType(type);
+    }
+    const d = params.get("date");
+    if (d) setDate(d);
+    const m = params.get("mileage");
+    if (m) setMileage(m);
+  }, []);
 
   const fmtDate = (value: string) =>
     value

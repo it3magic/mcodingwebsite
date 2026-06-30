@@ -15,7 +15,39 @@ import {
   ClipboardList,
   CalendarDays,
   Euro,
+  Sticker,
+  BarChart3,
+  ChevronRight,
+  ChevronDown,
+  ReceiptText,
+  RefreshCw,
 } from "lucide-react";
+
+interface ZohoInvoiceSummary {
+  id: string;
+  number: string;
+  date: string;
+  customerName: string;
+  total: number;
+  currencySymbol: string;
+  status: string;
+}
+
+const zohoStatusClass = (status: string): string => {
+  switch (status) {
+    case "paid":
+      return "bg-emerald-500/15 text-emerald-300";
+    case "overdue":
+      return "bg-red-500/15 text-red-300";
+    case "sent":
+    case "viewed":
+      return "bg-blue-500/15 text-blue-300";
+    case "partially_paid":
+      return "bg-amber-500/15 text-amber-300";
+    default:
+      return "bg-white/10 text-gray-300";
+  }
+};
 
 interface WorkRecord {
   id: string;
@@ -57,15 +89,33 @@ const fmtDate = (value: string): string => {
     : d.toLocaleDateString("en-IE", { day: "2-digit", month: "short", year: "numeric" });
 };
 
+const fmtMonth = (key: string): string => {
+  const [y, m] = key.split("-").map(Number);
+  if (!y || !m) return key;
+  return new Date(y, m - 1, 1).toLocaleDateString("en-IE", { month: "short", year: "numeric" });
+};
+
 export default function WorkRecordsPage() {
   const [records, setRecords] = useState<WorkRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [showBreakdown, setShowBreakdown] = useState(true);
+
+  // Zoho Books importer
+  const [showZoho, setShowZoho] = useState(false);
+  const [zohoConfigured, setZohoConfigured] = useState<boolean | null>(null);
+  const [zohoInvoices, setZohoInvoices] = useState<ZohoInvoiceSummary[]>([]);
+  const [zohoLoading, setZohoLoading] = useState(false);
+  const [zohoSearch, setZohoSearch] = useState("");
+  const [zohoError, setZohoError] = useState("");
+  const [importingId, setImportingId] = useState<string | null>(null);
 
   const loadRecords = useCallback(async () => {
     setLoading(true);
@@ -116,6 +166,56 @@ export default function WorkRecordsPage() {
     setError("");
   };
 
+  const loadZohoInvoices = useCallback(async (term = "") => {
+    setZohoLoading(true);
+    setZohoError("");
+    try {
+      const res = await fetch(
+        `/api/admin/zoho/invoices${term ? `?search=${encodeURIComponent(term)}` : ""}`,
+        { cache: "no-store" },
+      );
+      const data = await res.json();
+      setZohoConfigured(Boolean(data.configured));
+      if (data.error) setZohoError(data.error);
+      setZohoInvoices(Array.isArray(data.invoices) ? data.invoices : []);
+    } catch {
+      setZohoError("Could not reach Zoho Books. Please try again.");
+    } finally {
+      setZohoLoading(false);
+    }
+  }, []);
+
+  const openZoho = () => {
+    setShowZoho(true);
+    setZohoSearch("");
+    loadZohoInvoices("");
+  };
+
+  const importInvoice = async (id: string) => {
+    setImportingId(id);
+    setZohoError("");
+    try {
+      const res = await fetch(`/api/admin/zoho/invoices?id=${encodeURIComponent(id)}`, {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (data.error || !data.draft) {
+        setZohoError(data.error || "Could not load that invoice.");
+        return;
+      }
+      setEditingId(null);
+      setForm({ ...emptyForm(), ...data.draft });
+      setError("");
+      setShowForm(true);
+      setShowZoho(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setZohoError("Could not import that invoice.");
+    } finally {
+      setImportingId(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -157,14 +257,16 @@ export default function WorkRecordsPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return records;
-    return records.filter((r) =>
-      [r.registration, r.vehicle, r.customerName, r.workCarriedOut, r.notes]
+    return records.filter((r) => {
+      if (dateFrom && r.date && r.date < dateFrom) return false;
+      if (dateTo && r.date && r.date > dateTo) return false;
+      if (!q) return true;
+      return [r.registration, r.vehicle, r.customerName, r.workCarriedOut, r.notes]
         .join(" ")
         .toLowerCase()
-        .includes(q),
-    );
-  }, [records, search]);
+        .includes(q);
+    });
+  }, [records, search, dateFrom, dateTo]);
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -181,6 +283,27 @@ export default function WorkRecordsPage() {
     }
     return { total: records.length, thisMonth, revenue };
   }, [records]);
+
+  // Monthly breakdown over the currently-filtered set.
+  const monthly = useMemo(() => {
+    const map = new Map<string, { jobs: number; revenue: number }>();
+    for (const r of filtered) {
+      const key = (r.date || "").slice(0, 7); // yyyy-mm
+      if (!key) continue;
+      const entry = map.get(key) || { jobs: 0, revenue: 0 };
+      entry.jobs += 1;
+      entry.revenue += parseCost(r.cost);
+      map.set(key, entry);
+    }
+    const rows = Array.from(map.entries())
+      .map(([month, v]) => ({ month, ...v }))
+      .sort((a, b) => b.month.localeCompare(a.month));
+    const maxRevenue = rows.reduce((m, r) => Math.max(m, r.revenue), 0);
+    const totalRevenue = rows.reduce((s, r) => s + r.revenue, 0);
+    return { rows, maxRevenue, totalRevenue };
+  }, [filtered]);
+
+  const hasFilters = Boolean(search.trim() || dateFrom || dateTo);
 
   const exportCSV = () => {
     const headers = [
@@ -207,6 +330,13 @@ export default function WorkRecordsPage() {
     link.download = `work-records-${new Date().toISOString().split("T")[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const stickerHref = (r: WorkRecord) => {
+    const params = new URLSearchParams({ type: "service" });
+    if (r.date) params.set("date", r.date);
+    if (r.mileage) params.set("mileage", r.mileage);
+    return `/admin/engine-sticker?${params.toString()}`;
   };
 
   const inputClass =
@@ -373,9 +503,7 @@ export default function WorkRecordsPage() {
                 </div>
               </div>
 
-              {error && (
-                <p className="mt-4 text-sm text-red-400">{error}</p>
-              )}
+              {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
               <div className="mt-6 flex items-center gap-3">
                 <button
@@ -398,7 +526,7 @@ export default function WorkRecordsPage() {
           )}
 
           {/* Toolbar */}
-          <div className="flex flex-wrap items-center gap-3 mb-5">
+          <div className="flex flex-wrap items-center gap-3 mb-4">
             <div className="relative flex-1 min-w-[220px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
               <input
@@ -411,11 +539,18 @@ export default function WorkRecordsPage() {
             </div>
             <button
               onClick={exportCSV}
-              disabled={records.length === 0}
+              disabled={filtered.length === 0}
               className="px-4 py-2.5 bg-white/10 border border-white/15 text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Download size={18} />
               Export CSV
+            </button>
+            <button
+              onClick={openZoho}
+              className="px-4 py-2.5 bg-white/10 border border-white/15 text-white rounded-lg hover:bg-white/20 transition-all flex items-center gap-2"
+            >
+              <ReceiptText size={18} className="text-emerald-400" />
+              Import from Zoho
             </button>
             {!showForm && (
               <button
@@ -427,6 +562,92 @@ export default function WorkRecordsPage() {
               </button>
             )}
           </div>
+
+          {/* Date range filter */}
+          <div className="flex flex-wrap items-end gap-3 mb-6">
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">From</label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="px-3 py-2 bg-zinc-950 border border-white/15 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">To</label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="px-3 py-2 bg-zinc-950 border border-white/15 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            {hasFilters && (
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setDateFrom("");
+                  setDateTo("");
+                }}
+                className="px-3 py-2 text-sm text-gray-400 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-all flex items-center gap-1.5"
+              >
+                <X size={14} />
+                Clear filters
+              </button>
+            )}
+          </div>
+
+          {/* Monthly breakdown */}
+          {monthly.rows.length > 0 && (
+            <div className="bg-zinc-950 border border-white/10 rounded-xl mb-6 overflow-hidden">
+              <button
+                onClick={() => setShowBreakdown((s) => !s)}
+                className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors"
+              >
+                <span className="flex items-center gap-2 text-white font-semibold">
+                  <BarChart3 size={18} className="text-purple-400" />
+                  Monthly Breakdown
+                  <span className="text-sm font-normal text-gray-500">
+                    · €{monthly.totalRevenue.toLocaleString("en-IE", { maximumFractionDigits: 0 })} across{" "}
+                    {filtered.length} job{filtered.length === 1 ? "" : "s"}
+                  </span>
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={`text-gray-400 transition-transform ${showBreakdown ? "rotate-180" : ""}`}
+                />
+              </button>
+              {showBreakdown && (
+                <div className="px-5 pb-5 space-y-3">
+                  {monthly.rows.map((row) => (
+                    <div key={row.month} className="flex items-center gap-4">
+                      <div className="w-20 shrink-0 text-sm text-gray-400">{fmtMonth(row.month)}</div>
+                      <div className="flex-1 h-7 bg-white/[0.04] rounded-md overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 rounded-md flex items-center justify-end pr-2"
+                          style={{
+                            width: `${
+                              monthly.maxRevenue > 0
+                                ? Math.max(6, (row.revenue / monthly.maxRevenue) * 100)
+                                : 6
+                            }%`,
+                          }}
+                        >
+                          <span className="text-[11px] font-semibold text-white whitespace-nowrap">
+                            €{row.revenue.toLocaleString("en-IE", { maximumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-16 shrink-0 text-right text-sm text-gray-500">
+                        {row.jobs} job{row.jobs === 1 ? "" : "s"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Records */}
           <div className="bg-zinc-950 border border-white/10 rounded-xl overflow-hidden">
@@ -444,7 +665,7 @@ export default function WorkRecordsPage() {
                 <p className="text-gray-500 text-sm mb-6">
                   {records.length === 0
                     ? "Add your first job to start building the log."
-                    : "Try a different search term."}
+                    : "Try a different search term or date range."}
                 </p>
                 {records.length === 0 && (
                   <button
@@ -488,12 +709,15 @@ export default function WorkRecordsPage() {
                         <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">
                           {r.mileage ? `${r.mileage} km` : "—"}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-300 max-w-[320px]">
+                        <td className="px-4 py-3 text-sm text-gray-300 max-w-[300px]">
                           <span className="line-clamp-2" title={r.workCarriedOut}>
                             {r.workCarriedOut || "—"}
                           </span>
                           {r.notes && (
-                            <span className="mt-1 block text-xs text-gray-500 line-clamp-1" title={r.notes}>
+                            <span
+                              className="mt-1 block text-xs text-gray-500 line-clamp-1"
+                              title={r.notes}
+                            >
                               Note: {r.notes}
                             </span>
                           )}
@@ -503,6 +727,14 @@ export default function WorkRecordsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
+                            <Link
+                              href={stickerHref(r)}
+                              className="p-2 text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                              aria-label="Create service sticker"
+                              title="Create service sticker"
+                            >
+                              <Sticker size={16} />
+                            </Link>
                             <button
                               onClick={() => openEdit(r)}
                               className="p-2 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
@@ -534,6 +766,163 @@ export default function WorkRecordsPage() {
           )}
         </div>
       </div>
+
+      {/* Zoho Books importer */}
+      {showZoho && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto"
+          onClick={() => setShowZoho(false)}
+        >
+          <div
+            className="mt-20 w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <ReceiptText size={20} className="text-emerald-400" />
+                Import from Zoho Books
+              </h2>
+              <div className="flex items-center gap-1">
+                {zohoConfigured && (
+                  <button
+                    onClick={() => loadZohoInvoices(zohoSearch)}
+                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                    aria-label="Refresh"
+                    title="Refresh"
+                  >
+                    <RefreshCw size={16} className={zohoLoading ? "animate-spin" : ""} />
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowZoho(false)}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {zohoConfigured === false ? (
+                <div className="text-sm text-gray-300 space-y-3">
+                  <p className="text-gray-200 font-medium">Zoho Books isn&apos;t connected yet.</p>
+                  <p className="text-gray-400">
+                    Add these environment variables (from the Zoho API Console &amp; your
+                    organisation settings), then redeploy:
+                  </p>
+                  <ul className="space-y-1.5 font-mono text-xs">
+                    {[
+                      "ZOHO_CLIENT_ID",
+                      "ZOHO_CLIENT_SECRET",
+                      "ZOHO_REFRESH_TOKEN",
+                      "ZOHO_ORGANIZATION_ID",
+                      "ZOHO_ACCOUNTS_DOMAIN  (EU: https://accounts.zoho.eu)",
+                    ].map((v) => (
+                      <li key={v} className="text-emerald-300 bg-black/40 border border-white/10 rounded px-2 py-1">
+                        {v}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-gray-500 text-xs">
+                    Scope required: <span className="text-gray-300">ZohoBooks.invoices.READ</span>
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Search */}
+                  <div className="relative mb-4">
+                    <Search
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      size={16}
+                    />
+                    <input
+                      type="text"
+                      value={zohoSearch}
+                      onChange={(e) => setZohoSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") loadZohoInvoices(zohoSearch);
+                      }}
+                      placeholder="Search invoices by number or customer… (Enter)"
+                      className="w-full pl-9 pr-3 py-2.5 bg-black border border-white/15 rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  {zohoError && (
+                    <p className="mb-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                      {zohoError}
+                    </p>
+                  )}
+
+                  <div className="max-h-[50vh] overflow-y-auto -mx-1 px-1">
+                    {zohoLoading ? (
+                      <div className="flex items-center justify-center gap-3 py-12 text-gray-400">
+                        <Loader2 className="animate-spin" size={18} />
+                        Loading invoices…
+                      </div>
+                    ) : zohoInvoices.length === 0 ? (
+                      <div className="text-center py-12 text-gray-500 text-sm">
+                        No invoices found.
+                      </div>
+                    ) : (
+                      <ul className="divide-y divide-white/5">
+                        {zohoInvoices.map((inv) => (
+                          <li key={inv.id}>
+                            <button
+                              onClick={() => importInvoice(inv.id)}
+                              disabled={importingId !== null}
+                              className="w-full text-left py-3 px-2 rounded-lg hover:bg-white/[0.04] transition-colors flex items-center gap-3 disabled:opacity-60"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-white text-sm">
+                                    {inv.number || "—"}
+                                  </span>
+                                  {inv.status && (
+                                    <span
+                                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium capitalize ${zohoStatusClass(
+                                        inv.status,
+                                      )}`}
+                                    >
+                                      {inv.status.replace(/_/g, " ")}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-400 truncate">
+                                  {inv.customerName || "—"} · {fmtDate(inv.date)}
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <div className="text-sm font-semibold text-white">
+                                  {inv.currencySymbol}
+                                  {inv.total.toLocaleString("en-IE", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
+                                </div>
+                              </div>
+                              {importingId === inv.id ? (
+                                <Loader2 size={16} className="animate-spin text-emerald-400 shrink-0" />
+                              ) : (
+                                <ChevronRight size={16} className="text-gray-600 shrink-0" />
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-gray-600 mt-4">
+                    Selecting an invoice pre-fills a new record — review the details, then save.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
