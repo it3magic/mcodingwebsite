@@ -21,6 +21,8 @@ import {
   ChevronDown,
   ReceiptText,
   RefreshCw,
+  DownloadCloud,
+  CheckCircle2,
 } from "lucide-react";
 
 interface ZohoInvoiceSummary {
@@ -117,6 +119,18 @@ export default function WorkRecordsPage() {
   const [zohoError, setZohoError] = useState("");
   const [importingId, setImportingId] = useState<string | null>(null);
 
+  // Bulk "import a whole year" state
+  const currentYear = new Date().getFullYear();
+  const [bulkYear, setBulkYear] = useState<number>(currentYear);
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
+  const [bulkResult, setBulkResult] = useState<{
+    imported: number;
+    skipped: number;
+    errors: number;
+  } | null>(null);
+  const [bulkError, setBulkError] = useState("");
+
   const loadRecords = useCallback(async () => {
     setLoading(true);
     try {
@@ -188,7 +202,73 @@ export default function WorkRecordsPage() {
   const openZoho = () => {
     setShowZoho(true);
     setZohoSearch("");
+    setBulkResult(null);
+    setBulkError("");
+    setBulkRunning(false);
+    setBulkProgress({ done: 0, total: 0 });
+    setBulkYear(currentYear);
     loadZohoInvoices("");
+  };
+
+  const runBulkImport = async () => {
+    setBulkRunning(true);
+    setBulkError("");
+    setBulkResult(null);
+    setBulkProgress({ done: 0, total: 0 });
+    try {
+      const from = `${bulkYear}-01-01`;
+      const to = `${bulkYear}-12-31`;
+      const res = await fetch(`/api/admin/zoho/import?from=${from}&to=${to}`, {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (data.configured === false) {
+        setZohoConfigured(false);
+        return;
+      }
+      if (data.error) {
+        setBulkError(data.error);
+        return;
+      }
+      const candidates: (ZohoInvoiceSummary & { imported: boolean })[] = data.candidates || [];
+      const toImport = candidates.filter((c) => !c.imported).map((c) => c.id);
+      const alreadyImported = candidates.length - toImport.length;
+
+      if (toImport.length === 0) {
+        setBulkResult({ imported: 0, skipped: alreadyImported, errors: 0 });
+        await loadRecords();
+        return;
+      }
+
+      setBulkProgress({ done: 0, total: toImport.length });
+      let imported = 0;
+      let skipped = alreadyImported;
+      let errorsCount = 0;
+      const BATCH = 5;
+      for (let i = 0; i < toImport.length; i += BATCH) {
+        const batch = toImport.slice(i, i + BATCH);
+        try {
+          const r = await fetch("/api/admin/zoho/import", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: batch }),
+          });
+          const d = await r.json();
+          imported += Number(d.imported || 0);
+          skipped += Number(d.skipped || 0);
+          errorsCount += Array.isArray(d.errors) ? d.errors.length : 0;
+        } catch {
+          errorsCount += batch.length;
+        }
+        setBulkProgress({ done: Math.min(i + BATCH, toImport.length), total: toImport.length });
+      }
+      setBulkResult({ imported, skipped, errors: errorsCount });
+      await loadRecords();
+    } catch {
+      setBulkError("Bulk import failed. Please try again.");
+    } finally {
+      setBulkRunning(false);
+    }
   };
 
   const importInvoice = async (id: string) => {
@@ -831,6 +911,96 @@ export default function WorkRecordsPage() {
                 </div>
               ) : (
                 <>
+                  {/* Bulk import a whole year */}
+                  <div className="mb-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
+                    {bulkRunning ? (
+                      <div>
+                        <div className="mb-2 flex items-center gap-2 text-sm text-emerald-200">
+                          <Loader2 size={16} className="animate-spin" />
+                          Importing {bulkYear} invoices… {bulkProgress.done}/{bulkProgress.total}
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-black/40">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all"
+                            style={{
+                              width: `${
+                                bulkProgress.total
+                                  ? Math.max(5, (bulkProgress.done / bulkProgress.total) * 100)
+                                  : 5
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : bulkResult ? (
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="text-sm">
+                          <div className="flex items-center gap-2 font-medium text-emerald-300">
+                            <CheckCircle2 size={16} />
+                            Import complete
+                          </div>
+                          <div className="mt-1 text-gray-300">
+                            <span className="font-semibold text-white">{bulkResult.imported}</span> imported
+                            {" · "}
+                            {bulkResult.skipped} already there
+                            {bulkResult.errors > 0 && (
+                              <span className="text-amber-300"> · {bulkResult.errors} failed</span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setBulkResult(null)}
+                          className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-400 hover:text-white"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="text-sm">
+                          <div className="flex items-center gap-2 font-medium text-white">
+                            <DownloadCloud size={16} className="text-emerald-400" />
+                            Bulk import a whole year
+                          </div>
+                          <div className="mt-0.5 text-xs text-gray-400">
+                            Pulls every invoice for the year and skips any already imported.
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={bulkYear}
+                            onChange={(e) => setBulkYear(Number(e.target.value))}
+                            className="rounded-lg border border-white/15 bg-black px-2.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                          >
+                            {[0, 1, 2, 3].map((d) => {
+                              const y = currentYear - d;
+                              return (
+                                <option key={y} value={y}>
+                                  {y}
+                                </option>
+                              );
+                            })}
+                          </select>
+                          <button
+                            onClick={runBulkImport}
+                            className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-500"
+                          >
+                            <DownloadCloud size={16} />
+                            Import all {bulkYear}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {bulkError && <p className="mt-2 text-sm text-red-400">{bulkError}</p>}
+                  </div>
+
+                  <div className="mb-3 flex items-center gap-3">
+                    <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                      Or import one at a time
+                    </span>
+                    <span className="h-px flex-1 bg-white/10" />
+                  </div>
+
                   {/* Search */}
                   <div className="relative mb-4">
                     <Search
