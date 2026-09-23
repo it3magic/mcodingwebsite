@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { FileSpreadsheet, Mail, Zap, Download, ExternalLink, Bell, LogOut, MessageCircle, CreditCard, Wrench, ClipboardList, Car } from "lucide-react";
+import { FileSpreadsheet, Mail, Zap, Download, ExternalLink, Bell, MessageCircle, CreditCard, Wrench, ClipboardList, Car, WalletCards } from "lucide-react";
 import { isAuthenticated } from "@/lib/auth";
 import LogoutButton from "@/components/admin/logout-button";
 
@@ -177,6 +177,24 @@ export default async function AdminDashboardPage() {
               </h3>
               <p className="text-sm text-gray-400">
                 Log cars and the work carried out
+              </p>
+            </Link>
+
+            {/* Payment Delegation */}
+            <Link
+              href="/admin/payment-delegation"
+              className="group bg-gradient-to-br from-red-900/20 to-emerald-900/20 border border-white/10 rounded-xl p-6 hover:border-white/30 transition-all"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-red-500/20 rounded-lg">
+                  <WalletCards className="text-red-400" size={24} />
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">
+                Payment Delegation
+              </h3>
+              <p className="text-sm text-gray-400">
+                VAT, job costs, profit and cash allocations
               </p>
             </Link>
 

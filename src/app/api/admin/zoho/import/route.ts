@@ -111,6 +111,12 @@ export async function POST(request: NextRequest) {
         cost: r.draft.cost,
         notes: r.draft.notes,
         zohoInvoiceId: r.id,
+        invoiceNumber: r.draft.invoiceNumber,
+        invoiceTotal: r.draft.invoiceTotal,
+        vatAmount: r.draft.vatAmount,
+        paymentStatus: r.draft.paymentStatus,
+        amountReceived: r.draft.amountReceived,
+        jobCosts: [],
         createdAt: now,
         updatedAt: now,
       };

@@ -23,6 +23,7 @@ import {
   RefreshCw,
   DownloadCloud,
   CheckCircle2,
+  WalletCards,
 } from "lucide-react";
 
 interface ZohoInvoiceSummary {
@@ -807,6 +808,14 @@ export default function WorkRecordsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
+                            <Link
+                              href={`/admin/work-records/${r.id}`}
+                              className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                              aria-label="Open payment delegation"
+                              title="Costs and payment delegation"
+                            >
+                              <WalletCards size={16} />
+                            </Link>
                             <Link
                               href={stickerHref(r)}
                               className="p-2 text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"

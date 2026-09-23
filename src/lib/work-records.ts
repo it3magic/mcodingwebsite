@@ -2,6 +2,7 @@ import { getStore } from "@netlify/blobs";
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
+import type { JobCost, PaymentStatus } from "@/lib/payment-delegation";
 
 export interface WorkRecord {
   id: string;
@@ -15,6 +16,15 @@ export interface WorkRecord {
   notes: string;
   /** Set when the record was imported from a Zoho Books invoice (used to skip duplicates). */
   zohoInvoiceId?: string;
+  invoiceNumber?: string;
+  /** Gross customer-facing invoice total, including VAT. */
+  invoiceTotal?: number;
+  /** VAT amount kept separate from revenue and profit. */
+  vatAmount?: number;
+  paymentStatus?: PaymentStatus;
+  /** Cash actually received, including VAT. */
+  amountReceived?: number;
+  jobCosts?: JobCost[];
   createdAt: string;
   updatedAt: string;
 }

@@ -38,6 +38,11 @@ export interface ZohoInvoiceDraft {
   workCarriedOut: string;
   cost: string;
   notes: string;
+  invoiceNumber: string;
+  invoiceTotal: number;
+  vatAmount: number;
+  paymentStatus: "unpaid" | "partial" | "paid";
+  amountReceived: number;
 }
 
 function getConfig(): ZohoConfig | null {
@@ -229,9 +234,17 @@ function mapInvoiceToDraft(
     .filter(Boolean)
     .join("\n");
 
-  const total = inv.total;
+  const total = Number(inv.total ?? 0);
+  const vatAmount = Number(inv.tax_total ?? inv.tax_amount ?? 0);
   const number = String(inv.invoice_number ?? "");
-  const status = String(inv.status ?? "");
+  const status = String(inv.status ?? "").toLowerCase();
+  const balance = Number(inv.balance ?? total);
+  const paymentStatus: ZohoInvoiceDraft["paymentStatus"] =
+    status === "paid" ? "paid" : status === "partially_paid" ? "partial" : "unpaid";
+  const amountReceived =
+    paymentStatus === "paid"
+      ? total
+      : Math.max(0, Math.min(total, Number.isFinite(balance) ? total - balance : 0));
 
   return {
     date: String(inv.date ?? ""),
@@ -240,11 +253,16 @@ function mapInvoiceToDraft(
     vehicle,
     mileage,
     workCarriedOut,
-    cost: total !== undefined && total !== null ? `${symbol}${total}` : "",
+    cost: total ? `${symbol}${total}` : "",
     notes:
       `Imported from Zoho invoice ${number}` +
       (status ? ` (${status})` : "") +
       (reference ? ` · Ref: ${reference}` : ""),
+    invoiceNumber: number,
+    invoiceTotal: total,
+    vatAmount: Number.isFinite(vatAmount) ? vatAmount : 0,
+    paymentStatus,
+    amountReceived,
   };
 }
 
